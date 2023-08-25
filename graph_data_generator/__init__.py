@@ -5,7 +5,9 @@ import logging
 
 from graph_data_generator.logic.generate_zip import generate_zip
 from graph_data_generator.logic.generate_mapping import mapping_from_json
-from graph_data_generator.models.generator import generators_from_json
+from graph_data_generator.models.generator import generators_from_json, Generator
+from graph_data_generator.models.generator_arg import GeneratorArg
+from graph_data_generator.models.generator_type import GeneratorType
 from graph_data_generator.config import generators_json
 
 VERSION = "0.1.0"

@@ -182,7 +182,7 @@ class RelationshipMapping():
 
                 # Generate the properties
                 for property_name, property_mapping in self.properties.items():
-                    result[property_name] = property_mapping.generate_value()
+                    result[property_name] = property_mapping.generate_values()[0]
 
                 # Add the relationship to the list
                 all_results.append(result)

@@ -1,10 +1,11 @@
 from graph_data_generator.models.property_mapping import PropertyMapping
 from graph_data_generator.models.generator import Generator
 from graph_data_generator.utils.list_utils import clean_list
+from graph_data_generator.models.base_mapping import BaseMapping
 import logging
 
 
-class NodeMapping():
+class NodeMapping(BaseMapping):
 
     @staticmethod
     def empty():
@@ -45,29 +46,29 @@ class NodeMapping():
     def __str__(self):
         return f"NodeMapping(nid={self.nid}, caption={self.caption}, labels={self.labels}, properties={self.properties}, count_generator={self.count_generator}, count_args={self.count_args}, default_count={self.default_count}, key_property={self.key_property})"
 
-    def __repr__(self):
-        return self.__str__()
+    # def __repr__(self):
+    #     return self.__str__()
 
-    def __eq__(self, other):
-        if not isinstance(other, NodeMapping):
-            return False
-        if self.nid != other.nid:
-            return False
-        if self.caption != other.caption:
-            return False
-        if self.labels != other.labels:
-            return False
-        if self.properties != other.properties:
-            return False
-        if self.count_generator != other.count_generator:
-            return False
-        if self.count_args != other.count_args:
-            return False
-        if self.default_count != other.default_count:
-            return False
-        if self.key_property != other.key_property:
-            return False
-        return True
+    # def __eq__(self, other):
+    #     if not isinstance(other, NodeMapping):
+    #         return False
+    #     if self.nid != other.nid:
+    #         return False
+    #     if self.caption != other.caption:
+    #         return False
+    #     if self.labels != other.labels:
+    #         return False
+    #     if self.properties != other.properties:
+    #         return False
+    #     if self.count_generator != other.count_generator:
+    #         return False
+    #     if self.count_args != other.count_args:
+    #         return False
+    #     if self.default_count != other.default_count:
+    #         return False
+    #     if self.key_property != other.key_property:
+    #         return False
+    #     return True
 
     def to_dict(self):
         properties = {}
@@ -142,7 +143,7 @@ class NodeMapping():
                         continue
                     # Have PropertyMapping generate a value
                     try:
-                        value = property.generate_value()
+                        value = property.generate_values()[0]
                         if value is None:
                             logging.warning(f'Node mapping could not generate value for property: {property}')
                             continue

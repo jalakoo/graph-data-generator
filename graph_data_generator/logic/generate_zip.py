@@ -6,6 +6,31 @@ import json
 import zipfile
 from graph_data_generator.models.data_import import DataImporterJson
 from graph_data_generator.models.generator import Generator
+from graph_data_generator.models.base_mapping import BaseMapping
+
+
+def generate_csvs(mappings: dict[str, BaseMapping]) -> str:
+    for m_id, mapping in mappings:
+        # Generate values from mappings
+        values : list[dict] = mapping.generate_values()
+        
+        # Generate csv from values
+        if values is None or values == []:
+            logging.warning(f'No values generated for {mapping}')
+            continue
+    
+        # Each node dataset will need it's own CSV file
+        fieldnames = values[0].keys()
+        m_buffer = io.StringIO()
+        m_writer = csv.DictWriter(m_buffer, fieldnames=fieldnames)
+        m_writer.writeheader()
+
+        for row in values:
+            try:
+                m_writer.writerow(row)
+            except Exception as e:
+                return None, f'Mapping generation failed for {m_id}: ERROR: {e}'
+        return m_buffer.getvalue()
 
 def generate_zip(
         mapping: Mapping,
