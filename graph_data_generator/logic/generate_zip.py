@@ -5,33 +5,8 @@ import csv
 import json
 import zipfile
 from graph_data_generator.models.data_import import DataImporterJson
-from graph_data_generator.models.generator import Generator
-from graph_data_generator.models.base_mapping import BaseMapping
 
-
-def generate_csvs(mappings: dict[str, BaseMapping]) -> str:
-    for m_id, mapping in mappings:
-        # Generate values from mappings
-        values : list[dict] = mapping.generate_values()
-        
-        # Generate csv from values
-        if values is None or values == []:
-            logging.warning(f'No values generated for {mapping}')
-            continue
-    
-        # Each node dataset will need it's own CSV file
-        fieldnames = values[0].keys()
-        m_buffer = io.StringIO()
-        m_writer = csv.DictWriter(m_buffer, fieldnames=fieldnames)
-        m_writer.writeheader()
-
-        for row in values:
-            try:
-                m_writer.writerow(row)
-            except Exception as e:
-                return None, f'Mapping generation failed for {m_id}: ERROR: {e}'
-        return m_buffer.getvalue()
-
+# TODO: Split the csv and zip functions out
 def generate_zip(
         mapping: Mapping,
         )->tuple[io.BytesIO, str]:
@@ -48,14 +23,27 @@ def generate_zip(
         in_memory_data, "w", zipfile.ZIP_DEFLATED, False)
     in_memory_zip.debug = 3 
 
+    # Capture generation logs into an input stream
+    logs_buffer = io.StringIO()
+    # Adding a handler to the global logging module not working as expected
+    # logger = logging.getLogger()
+    # logs_handler = logging.StreamHandler(logs_buffer)
+    # logger.addHandler(logs_handler)
+    logs_buffer.write(f'Starting data generation...\n')
+
     # Process nodes
+    logs_buffer.write(f'Processing {len(mapping.nodes)} node types...\n')
+    successful_nodes = 0
     for nid, node in mapping.nodes.items():
         # Generate values from mappings
-        values : list[dict] = node.generate_values()
-        
+        try:
+            values : list[dict] = node.generate_values()
+        except Exception as e:
+            logs_buffer.write(f'Node {node} value generation failed: {e}\n')
+
         # Generate csv from values
         if values is None or values == []:
-            logging.warning(f'No values generated for node {node.caption}')
+            logs_buffer.write(f'No values generated for node {node.caption}\n')
             continue
     
         # Each node dataset will need it's own CSV file
@@ -67,27 +55,40 @@ def generate_zip(
         for row in values:
             try:
                 nodes_writer.writerow(row)
+                successful_nodes += 1
             except Exception as e:
-                return None, f'Node {node.caption} generation failed: {e}'
+                # return None, f'Node {node.caption} generation failed: {e}'
+                logs_buffer.write(f'Node {node} generation failed: {e}')
+                continue
         in_memory_zip.writestr(f"{node.filename()}.csv", nodes_buffer.getvalue())
-    
+    logs_buffer.write(f'Generated {successful_nodes} nodes\n')
 
+    logs_buffer.write(f'Processing {len(mapping.relationships)} relationship types...\n')
+    successful_rels = 0
     for rid, rel in mapping.relationships.items():
         # Generate values from mappings
-        values : list[dict] = rel.generate_values()
+        try:
+            values : list[dict] = rel.generate_values()
+        except Exception as e:
+            logs_buffer.write(f'Relationship {rel} generation failed: {e}\n')
+            continue
 
         # Generate csv from values
         if values is None or values == []:
-            logging.warning(f'No values generated for relationship {rel.type}')
+            logs_buffer.write(f'No values generated for relationship {rel.type}\n')
             continue
         fieldnames = values[0].keys()
         rels_buffer = io.StringIO()
         writer = csv.DictWriter(rels_buffer, fieldnames=fieldnames)
         writer.writeheader()
         for row in values:
-            writer.writerow(row)
+            try:
+                writer.writerow(row)
+                successful_rels += 1
+            except Exception as e:
+                logs_buffer.write(f'Relationship {rel} generation failed: {e}\n')
         in_memory_zip.writestr(f"{rel.filename()}.csv", rels_buffer.getvalue())
-
+    logs_buffer.write(f'Generated {successful_rels} relationships\n')
 
     # generate data-importer.json
     dij = DataImporterJson()
@@ -97,11 +98,17 @@ def generate_zip(
     dij.add_relationships(relationships)
     dij_dict = dij.to_dict()
 
+    logs_buffer.write(f'Writing data-importer.json...\n')
     try:
         di_dump = json.dumps(dij_dict)
         in_memory_zip.writestr("neo4j_importer_model.json", di_dump)
-        
+        logs_buffer.write(f'Successfully wrote data-importer.json.\n')
+
     except Exception as e:
-        return None, f'Error adding nodes and relationships for data-importer json: predump: {dij_dict}: \n\nError: {e}'
+        # return None, f'Error adding nodes and relationships for data-importer json: predump: {dij_dict}: \n\nError: {e}'
+        logs_buffer.write(f'Problem creating import model .json generation failed: {e}')
+
+    logs_buffer.write(f'Data generation process complete.\n')
+    in_memory_zip.writestr(f"logs.txt", logs_buffer.getvalue())
 
     return in_memory_data, None

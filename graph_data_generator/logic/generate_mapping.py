@@ -29,7 +29,7 @@ def propertymappings_for_raw_properties(
     Parameters:
     
     raw_properties (dict): Raw property definitions from node or relationship
-    generators (dict): Available generator objects. [name : Generator] 
+    generators (dict): All available generator objects. [name : Generator] 
 
     Returns:
     dict: PropertyMapping objects keyed by property name 
@@ -46,6 +46,7 @@ def propertymappings_for_raw_properties(
         raw_properties["KEY"] = "_uid"
         raw_properties["_uid"] = f'{{"uuid":[]}}'
 
+    # Cycle through all properties and convert to a property mapping
     for key, value in raw_properties.items():
 
         # Skip any keys with { } (brackets) as these are special cases for defining count/assignment/filter generators
