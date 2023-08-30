@@ -1,10 +1,11 @@
 from graph_data_generator.models.mapping import Mapping
-import logging
+# from graph_data_generator.logger import ModuleLogger
 import io 
 import csv
 import json
 import zipfile
 from graph_data_generator.models.data_import import DataImporterJson
+from graph_data_generator.logger import ModuleLogger
 
 # TODO: Split the csv and zip functions out
 def generate_zip(
@@ -25,10 +26,6 @@ def generate_zip(
 
     # Capture generation logs into an input stream
     logs_buffer = io.StringIO()
-    # Adding a handler to the global logging module not working as expected
-    # logger = logging.getLogger()
-    # logs_handler = logging.StreamHandler(logs_buffer)
-    # logger.addHandler(logs_handler)
     logs_buffer.write(f'Starting data generation...\n')
 
     # Process nodes
@@ -39,7 +36,9 @@ def generate_zip(
         try:
             values : list[dict] = node.generate_values()
         except Exception as e:
+            ModuleLogger().error(f'Failed to generate values for node with caption: {node.caption}. ERROR: {e}')
             logs_buffer.write(f'Node {node} value generation failed: {e}\n')
+            continue
 
         # Generate csv from values
         if values is None or values == []:

@@ -2,7 +2,7 @@
 from graph_data_generator.models.node_mapping import NodeMapping
 from graph_data_generator.models.property_mapping import PropertyMapping
 from graph_data_generator.models.generator import Generator
-import logging
+from graph_data_generator.logger import ModuleLogger
 import sys
 from copy import deepcopy
 from graph_data_generator.utils.list_utils import clean_list
@@ -153,7 +153,7 @@ class RelationshipMapping():
 
                 if values is None or len(values) == 0:
                     # TODO: This appears to break the randomization
-                    logging.info(f'relationship_mapping.py: values exhausted at index {i} before count of {count} reached. Values: {len(values)}')
+                    # ModuleLogger().debug(f'relationship_mapping.py: values exhausted at index {i} before count of {count} reached.')
                     continue
 
                 # Extract results. Values will be passed back through the next iteration in case the generator returns a modified list
@@ -189,6 +189,5 @@ class RelationshipMapping():
 
         # Store results for reference
         self.generated_values = all_results
-        # logging.info(f'relationship_mapping.py: 1 value: {self.generated_values[0]}')
         return self.generated_values
         

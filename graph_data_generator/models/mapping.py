@@ -1,7 +1,7 @@
 
 from graph_data_generator.models.node_mapping import NodeMapping
+from graph_data_generator.logger import ModuleLogger
 import json
-import logging
 import sys
 
 
@@ -42,19 +42,17 @@ class Mapping():
 
         for node in self.nodes.values():
             if node.ready_to_generate() == False:
-                # logging.info(f'mapping.py (model): is_valid. Node not ready to generate: {node}')
                 return False
         for relationship in self.relationships.values():
             if relationship.ready_to_generate() == False:
-                # logging.info(f'mapping.py (model): is_valid. Relationship not ready to generate: {relationship}')
                 return False
 
         try:
             json.loads(json.dumps(self.to_dict()))
             return True
         except ValueError as err:
-            logging.error(f'mapping.py (model): is_valid. ERROR: {err} for mapping: {self}')
+            ModuleLogger().error(f'mapping.py (model): is_valid. ERROR: {err} for mapping: {self}')
             return False
         except:
-            logging.error(f'mapping.py (model): is_valid. ERROR: {sys.exc_info()[0]} for mapping: {self}')
+            ModuleLogger().error(f'mapping.py (model): is_valid. ERROR: {sys.exc_info()[0]} for mapping: {self}')
             return False
