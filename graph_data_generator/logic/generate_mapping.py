@@ -277,7 +277,7 @@ def relationshipmappings_from(
         try:
             count_generator, count_args = generator_for_raw_property(count_generator_config, generators)
         except Exception as e:
-            raise Exception(f"Could not find count generator for relationship: {relationship_dict}: {e}")
+            raise Exception(f"Could not find count generator for relationship: {relationship_dict}: COUNT CONFIG: {count_generator_config}: ERROR: {e}")
 
         # Create property mappings for properties
         try:

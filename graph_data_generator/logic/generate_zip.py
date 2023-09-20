@@ -35,6 +35,7 @@ def generate_zip(
         # Generate values from mappings
         try:
             values : list[dict] = node.generate_values()
+            logs_buffer.write(f'Generated values for node type {nid}: {values}\n')
         except Exception as e:
             ModuleLogger().error(f'Failed to generate values for node with caption: {node.caption}. ERROR: {e}')
             logs_buffer.write(f'Node {node} value generation failed: {e}\n')

@@ -258,11 +258,10 @@ def literal_generator_from_value(
                 "string_from_list": [f"{value[1:-1]}"]
             }
 
-    # Default is to use the string literal generator
+    # Return nothing, so caller knows no generator was matched
     if result is None:
-        result = {
-            "string": [value]
-        }
+         return None, None
+
     # Package and return from legacy process
     actual_string = json.dumps(result)
     return actual_generator_for_raw_property(actual_string, generators)
@@ -299,16 +298,24 @@ def generator_for_raw_property(
 
     generator, args = None, None
 
-    if generator is None:
-        generator, args = keyword_generator_for_raw_property(property_value, generators)
-
-    # Also returns None, None if no matching generator found
-    if generator is None:
-        generator, args = actual_generator_for_raw_property(property_value, generators)
-
     # Check for new literal assignments
-    # Defaults to string literal
+    # Returns None if no matching generator found
     if generator is None: 
         generator, args = literal_generator_from_value(property_value, generators)
 
+    if generator is None:
+        generator, args = keyword_generator_for_raw_property(property_value, generators)
+
+    # Returns None if no matching generator found
+    if generator is None:
+        generator, args = actual_generator_for_raw_property(property_value, generators)
+
+
+    # Default is to use string literal generator
+    if generator is None:
+        default = {
+            "string": [f"property_value"]
+        }
+        generator, args = actual_generator_for_raw_property(default, generators)
+ 
     return (generator, args)
