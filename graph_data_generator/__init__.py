@@ -9,7 +9,7 @@ from graph_data_generator.logic.generate_mapping import mapping_from_json
 from graph_data_generator.models.generator import Generator, generators_from_json
 from graph_data_generator.models.generator_arg import GeneratorArg
 from graph_data_generator.models.generator_type import GeneratorType
-from graph_data_generator.generators.all_generators import generators
+from graph_data_generator.generators.ALL_GENERATORS import generators
 from graph_data_generator.logger import ModuleLogger
 
 VERSION = "0.2.0"

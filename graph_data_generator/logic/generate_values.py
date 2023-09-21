@@ -302,7 +302,6 @@ def generator_for_raw_property(
 
     # For supporting following options: "string", "bool", "boolean", "float", "integer", "number", "date", "datetime"
     if generator is None:
-        ModuleLogger().debug(f'No literal generator found for {property_value}, checking for keyword specifications')
         generator, args = keyword_generator_for_raw_property(property_value, generators)
 
     # Original Sample expected string: "{\"company_name\":[]}"
@@ -313,7 +312,6 @@ def generator_for_raw_property(
     # Function generators are also handled here
     # Returns None if no matching generator found
     if generator is None:
-        ModuleLogger().debug(f'No keyword generator found for {property_value}, checking for JSON specification')
         generator, args = actual_generator_for_raw_property(property_value, generators)
 
 
