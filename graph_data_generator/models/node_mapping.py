@@ -122,27 +122,21 @@ class NodeMapping(BaseMapping):
         count = 0
         all_results = []
 
-        # ModuleLogger().debug(f'Node mapping with caption {self.caption} generating values...')
-
         if self.count_generator is None:
             ModuleLogger().debug(f'No COUNT generator assigned to node with caption {self.caption}. Using default count {self.default_count}')
             count = self.default_count
         else:
             # Have a count generator to use
             # Will throw an exception if the count generator fails
-            # ModuleLogger().debug(f'Count generator name: {self.count_generator.name}: count args: {self.count_args} ...')
             count = self.count_generator.generate(self.count_args)
 
             if isinstance(count, int) == False:
                 ModuleLogger().error(f'Count generator did not produce an int value: count read: {count}')
                 raise Exception(f"Node mapping count_generator returned a non-integer value: {count}. Check code for generator: {self.count_generator.name}")
         
-        # ModuleLogger().debug(f'Count generated: {count}')
 
-        # try:
         for _ in range(count):
             node_result = {}
-            # ModuleLogger().debug(f'Properties to generate values for: {self.properties.items()}')
             for property_id, property in self.properties.items():
                 # Pass literal values
                 if isinstance(property, PropertyMapping) == False:
@@ -163,10 +157,7 @@ class NodeMapping(BaseMapping):
                 except Exception as e:
                     ModuleLogger().error(f'Node mapping failed to generate values for property: {property}. Error: {e}')
                     raise e
-            # node_result["_uid"] = f"{self.id}_{str(uuid.uuid4())[:8]}"
             all_results.append(node_result)
-        # except Exception as e:
-        #     raise Exception(f"Node mapping could not generate property values, error: {e}")
         
         # Store and return all_results
         self.generated_values = all_results

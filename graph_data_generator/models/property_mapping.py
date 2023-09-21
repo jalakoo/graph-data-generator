@@ -58,6 +58,5 @@ class PropertyMapping(BaseMapping):
             raise Exception(f'Property Mapping named {self.name} is missing a generator property.')
 
         result = self.generator.generate(self.args)
-        # ModuleLogger().debug(f'Generated values: {result}')
         return [result]
 

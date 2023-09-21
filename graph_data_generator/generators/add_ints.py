@@ -1,5 +1,4 @@
 
-from graph_data_generator.logger import ModuleLogger
 from graph_data_generator.models.generator import Generator
 
 def generate(args: list[any]):

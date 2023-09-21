@@ -56,9 +56,7 @@ def propertymappings_for_raw_properties(
         # Skip special COUNT and KEY literals
         if key == "COUNT" or key == "KEY":
                 continue
-        
-        ModuleLogger().debug(f'Generating PropertyMapping for key: {key}: with value: {value}')
-        
+
         try:
             generator, args = generator_for_raw_property(value, generators)
             if generator is None:
@@ -168,8 +166,6 @@ def node_mappings_from(
             if count_generator_config is None:
                 # Default to a random int range
                 count_generator_config = '{"int_range": [1,100]}'
-
-        ModuleLogger().debug(f'Node captioned {caption} count generator config: {count_generator_config}')
 
         # Get proper generators for count generator
         try:

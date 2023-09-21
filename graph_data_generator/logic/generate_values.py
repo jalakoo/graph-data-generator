@@ -5,8 +5,6 @@ import json
 import re
 from datetime import datetime
 
-# from graph_data_generator.generators.all_generators import generators
-
 # ORIGINAL GENERATOR ASSIGNMENT
 def actual_generator_for_raw_property(
     property_value: str, 
@@ -16,7 +14,6 @@ def actual_generator_for_raw_property(
     # Sample property_values: 
     #   "{\"company_name\":[]}"
     
-    # try:
     if isinstance(property_value, str):
         try:
             obj = json.loads(property_value)
@@ -40,10 +37,8 @@ def actual_generator_for_raw_property(
             # Value of function generators is a list of JSON object specifications for other generators. Retrieve these and insert them as arg values to be run by the actual function generators that are expecting tuples of (Generator, Args)
             new_value = []
             for gen_spec in value:
-                ModuleLogger().debug(f'Function generator converting spec: {gen_spec} to (generator, arg) tuple...')
                 gen, args = generator_for_raw_property(gen_spec, generators)
                 new_value.append((gen, args))
-                ModuleLogger().debug(f'Function Generator (generator, args) tuple added to new_value: {new_value}')
             value = new_value
             
         if generator is None:
@@ -51,8 +46,6 @@ def actual_generator_for_raw_property(
             return (None, None)
         args = value
         return (generator, args)
-    # except Exception as e:
-    #     ModuleLogger().debug(f'Could not parse JSON string: {property_value}. Returning None from generator assignment for property_value: {property_value}')
 
     return (None, None)
 
@@ -66,7 +59,7 @@ def keyword_generator_for_raw_property(
     result = None
 
     # Is an object? Not a keyword generator then
-    if isinstance(value, dict) == False:
+    if isinstance(value, dict):
         return (None, None)
     
     # Not a string? Then can't be a keyword generator
@@ -276,11 +269,6 @@ def literal_generator_from_value(
     # Package and return from legacy process
     actual_string = json.dumps(result)
     return actual_generator_for_raw_property(actual_string, generators)
-
-# def function_generator_for_raw_property(
-#           property_value: str, 
-#           generators: list[Generator]) -> tuple[Generator, list[any]]:
-    #  Check to see if the generator type is a function type generator
 
 def assignment_generator_for(
     config: str,

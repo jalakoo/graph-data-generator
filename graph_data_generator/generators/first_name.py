@@ -1,5 +1,4 @@
 from faker import Faker
-from graph_data_generator.logger import ModuleLogger
 
 fake = Faker()
 

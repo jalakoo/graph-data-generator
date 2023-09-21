@@ -153,7 +153,6 @@ class RelationshipMapping():
 
                 if values is None or len(values) == 0:
                     # TODO: This appears to break the randomization
-                    # ModuleLogger().debug(f'relationship_mapping.py: values exhausted at index {i} before count of {count} reached.')
                     continue
 
                 # Extract results. Values will be passed back through the next iteration in case the generator returns a modified list
