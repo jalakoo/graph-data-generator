@@ -21,7 +21,7 @@ def actual_generator_for_raw_property(
         try:
             obj = json.loads(property_value)
         except Exception as e:
-            ModuleLogger().error(f'Could not parse JSON string: {property_value}. Returning None from generator assignment for property_value: {property_value}')
+            ModuleLogger().warning(f'Could not parse JSON string: {property_value}')
             return (None, None)
     elif isinstance(property_value, dict):
         obj = property_value
@@ -36,12 +36,14 @@ def actual_generator_for_raw_property(
         if generator is not None and generator.type == GeneratorType.FUNCTION:
             # Extract the generators from the args and pass tuples of (Generator, Args) as higher level args 
             ModuleLogger().debug(f'Function generator {generator.name} detected. Arg value: {value}')
+
+            # Value of function generators is a list of JSON object specifications for other generators. Retrieve these and insert them as arg values to be run by the actual function generators that are expecting tuples of (Generator, Args)
             new_value = []
             for gen_spec in value:
-                # ModuleLogger().debug(f'Function generator converting spec: {gen_spec} to generator...')
+                ModuleLogger().debug(f'Function generator converting spec: {gen_spec} to (generator, arg) tuple...')
                 gen, args = generator_for_raw_property(gen_spec, generators)
                 new_value.append((gen, args))
-                # ModuleLogger().debug(f'Generator and args added to new_value: {new_value}')
+                ModuleLogger().debug(f'Function Generator (generator, args) tuple added to new_value: {new_value}')
             value = new_value
             
         if generator is None:
@@ -63,10 +65,14 @@ def keyword_generator_for_raw_property(
 
     result = None
 
+    # Is an object? Not a keyword generator then
+    if isinstance(value, dict) == False:
+        return (None, None)
+    
     # Not a string? Then can't be a keyword generator
     if isinstance(value, str) == False:
          return (None, None)
-
+    
     if value.lower() == "string":
             result = {
                 "lorem_words": [1,3]
@@ -204,6 +210,11 @@ def literal_generator_from_value(
     
     result = None
 
+    # Dictionary objects are usually JSON specifications for generators
+    # In any case, no literal generator based on such an object anyways
+    if isinstance(value, dict):
+         return None, None
+    
     # Check if value is an int or float
     if is_int(value):
         integer = int(value)
@@ -266,6 +277,11 @@ def literal_generator_from_value(
     actual_string = json.dumps(result)
     return actual_generator_for_raw_property(actual_string, generators)
 
+# def function_generator_for_raw_property(
+#           property_value: str, 
+#           generators: list[Generator]) -> tuple[Generator, list[any]]:
+    #  Check to see if the generator type is a function type generator
+
 def assignment_generator_for(
     config: str,
     generators: dict[str, Generator]
@@ -278,7 +294,7 @@ def assignment_generator_for(
     return gen, args
 
 def generator_for_raw_property(
-    property_value: str, 
+    property_value: any, 
     generators: dict[str, Generator]
     ) -> tuple[Generator, list[any]]:
     """
@@ -288,33 +304,36 @@ def generator_for_raw_property(
         Return None if no generator found.
     """
 
-    # Original Sample expected string: "{\"company_name\":[]}"
-    # New literal examples: 
-    #     "{\"company_name\":\"Acme\"}"
-    #     "{\"company_name\":[\"Acme\"]}"
-    #     "{\"company_name\":\"string\"}"
-
-    # Also fupport following options: "string", "bool", "boolean", "float", "integer", "number", "date", "datetime"
-
     generator, args = None, None
 
+    # Supports literals like 1, 1-10, etc
     # Check for new literal assignments
     # Returns None if no matching generator found
     if generator is None: 
         generator, args = literal_generator_from_value(property_value, generators)
 
+    # For supporting following options: "string", "bool", "boolean", "float", "integer", "number", "date", "datetime"
     if generator is None:
+        ModuleLogger().debug(f'No literal generator found for {property_value}, checking for keyword specifications')
         generator, args = keyword_generator_for_raw_property(property_value, generators)
 
+    # Original Sample expected string: "{\"company_name\":[]}"
+    # New literal examples: 
+    #     "{\"company_name\":\"Acme\"}"
+    #     "{\"company_name\":[\"Acme\"]}"
+    #     "{\"company_name\":\"string\"}"
+    # Function generators are also handled here
     # Returns None if no matching generator found
     if generator is None:
+        ModuleLogger().debug(f'No keyword generator found for {property_value}, checking for JSON specification')
         generator, args = actual_generator_for_raw_property(property_value, generators)
 
 
     # Default is to use string literal generator
     if generator is None:
+        ModuleLogger().debug(f"No generator found for property value: {property_value}. Defaulting to string literal generator")
         default = {
-            "string": [f"property_value"]
+            "string": [f"{property_value}"]
         }
         generator, args = actual_generator_for_raw_property(default, generators)
  

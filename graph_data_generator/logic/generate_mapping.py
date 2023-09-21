@@ -56,7 +56,9 @@ def propertymappings_for_raw_properties(
         # Skip special COUNT and KEY literals
         if key == "COUNT" or key == "KEY":
                 continue
-
+        
+        ModuleLogger().debug(f'Generating PropertyMapping for key: {key}: with value: {value}')
+        
         try:
             generator, args = generator_for_raw_property(value, generators)
             if generator is None:
@@ -77,7 +79,7 @@ def propertymappings_for_raw_properties(
             )
             property_mappings[pid] = property_mapping
         except Exception as e:
-            ModuleLogger().warning(f'generate_mapping.py: propertymappings_for_raw_properties: could not create property mapping for key: {key}, property_value: {value}: {e}')
+            ModuleLogger().warning(f'generate_mapping.py: propertymappings_for_raw_properties: could not create property mapping for key: {key}, property_value: {value}: ERROR: {e}')
             continue
     return property_mappings
 

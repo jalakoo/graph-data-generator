@@ -52,28 +52,11 @@ class PropertyMapping(BaseMapping):
         return True
     
     def generate_values(self) -> list[dict]:
+        
+        # Generator needed to be assigned before this call
         if self.generator == None:
             raise Exception(f'Property Mapping named {self.name} is missing a generator property.')
-        if self.generator.type == GeneratorType.FUNCTION and isinstance(self.args, list):
-            # Assuming this is a list of tuples - can not check for paramterized generic classes
-            ModuleLogger().debug(f'Property mapping with function generator named {self.generator.name} detected. Args: {self.args}')
-            # Force any Generator args to generate
-            new_args = []
-            for gen_arg in self.args:
-                if isinstance(gen_arg, tuple) == False:
-                    # Not a tuple of (Generator, arg). Process as is
-                    new_args.append(gen_arg)
-                    continue
-                gen = gen_arg[0]
-                if isinstance(gen, Generator) == False:
-                    # Not a tuple of (Generator, args) or already ran
-                    new_args.append(gen_arg)
-                    continue
-                ModuleLogger().debug(f'Processing tuple gen_arg: {gen_arg}...')
-                output = gen.generate(gen_arg[1])
-                new_args.append(output)
-            self.args = new_args
-            # ModuleLogger().debug(f'Generated args: {self.args}')
+
         result = self.generator.generate(self.args)
         # ModuleLogger().debug(f'Generated values: {result}')
         return [result]

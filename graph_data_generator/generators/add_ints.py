@@ -1,4 +1,6 @@
 
+from graph_data_generator.logger import ModuleLogger
+from graph_data_generator.models.generator import Generator
 
 def generate(args: list[any]):
     """
@@ -11,6 +13,7 @@ def generate(args: list[any]):
     int: Sum of outputs from specified number generators
     """
     result = 0
-    for num in args:
-        result += int(num)
+    for gen, gen_args in args:
+        value = gen.generate(gen_args)
+        result += int(value)
     return result
