@@ -97,8 +97,8 @@ The `generator_name` must be one of the existing unique generator names included
 The list value is the arguments list for the generator. The expected value types and number are dependent on the specified generator. The `generators/ALL_GENERATORS.py` file contains a `generators_json` file that list all the available generators, their type, and what arguments (if any) each expect.
 
 ***CONVENIENCE KEYWORDS***
-The following keywords, regardless of casing, will map to pre-built generators as shorthands:
-| Keyword | Output Description  |
+The following keyword values, regardless of casing, will map to pre-built generators as shorthands:
+| Value | Output Description  |
 | ------ | ---------|
 | bool | Random True or False value |
 | boolean | (Same as above)
@@ -108,6 +108,16 @@ The following keywords, regardless of casing, will map to pre-built generators a
 | integer | (Same as above) |
 | float | Random two decimal float value between 1.00 and 100.00 |
 | string | Between 1 and 3 random lorem words |
+
+***CONVENIENCE SHORTHANDS***
+The following value formats will map to pre-built functions with a given set of arguments:
+| Type | Example Value | Output Description  |
+| ------ | ---------| ----- |
+| Range of Ints | 0-3 | Each record will have a randomly generated value between 0 and 3 |
+| Range of Floats | 1.0-3.0 | Each record will have a randomly generated float value between 1.0 and 3.0. The highest decimal precision in either the start or end range value will be returned |
+| List of Ints | [1,3,5] | Each record will have a randomly selected int value from the list |
+| List of Floats | [2.0, 5.00, 7.001] | Each record will have a randomly selected float from the list. The highest precision specified in any of the floats will be used in the resulting value (so if 2.0 were selected, the value 2.000 would be returned) |
+| List of Strings | ["Iron Man", "Captain America", "Spiderman"] | Each record would have one of the listed string values. So from the example case: `Iron Man`, `Captain America`, or `Spiderman` would be assigned to each node / relationship record created |
 
 
 ## Installation
