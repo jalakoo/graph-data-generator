@@ -1,22 +1,18 @@
 
 import io
 import json
-import logging
 
 from graph_data_generator.logic.generate_zip import generate_zip
 from graph_data_generator.logic.generate_mapping import mapping_from_json
-from graph_data_generator.models.generator import generators_from_json
-from graph_data_generator.config import generators_json
 
-VERSION = "0.1.0"
+# Here also to expose for external use
+from graph_data_generator.models.generator import Generator, generators_from_json
+from graph_data_generator.models.generator_arg import GeneratorArg
+from graph_data_generator.models.generator_type import GeneratorType
+from graph_data_generator.generators.ALL_GENERATORS import generators
+from graph_data_generator.logger import ModuleLogger
 
-def setup_logging():
-    logger = logging.getLogger(__name__)
-    FORMAT = "[%(filename)s:%(lineno)s - %(funcName)20s() ] %(message)s"
-    logging.basicConfig(format=FORMAT)
-    logger.setLevel(logging.DEBUG)
-
-generators = generators_from_json(generators_json)
+VERSION = "0.2.0"
 
 def generate(
     json_source : any,
@@ -45,7 +41,9 @@ def generate(
 
     # TODO: Replace with a enum for output_format or arg for a logger object
     if enable_logging is True:
-        setup_logging()
+        logger = ModuleLogger()
+        logger.is_enabled = True
+        logger.info(f'Logging enabled')
 
     # If json_object is a string, load and convert into a dict object
     if isinstance(json_source, str) is True:
@@ -72,6 +70,8 @@ def generate(
     )
     if bytes is None:
         raise Exception(error_msg)
+    if error_msg is not None:
+        ModuleLogger().error(error_msg)
 
     if output_format == 'string':
         data_bytes = bytes.getvalue()

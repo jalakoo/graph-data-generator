@@ -1,10 +1,11 @@
 from graph_data_generator.models.property_mapping import PropertyMapping
 from graph_data_generator.models.generator import Generator
 from graph_data_generator.utils.list_utils import clean_list
-import logging
+from graph_data_generator.models.base_mapping import BaseMapping
+from graph_data_generator.logger import ModuleLogger
 
 
-class NodeMapping():
+class NodeMapping(BaseMapping):
 
     @staticmethod
     def empty():
@@ -45,29 +46,29 @@ class NodeMapping():
     def __str__(self):
         return f"NodeMapping(nid={self.nid}, caption={self.caption}, labels={self.labels}, properties={self.properties}, count_generator={self.count_generator}, count_args={self.count_args}, default_count={self.default_count}, key_property={self.key_property})"
 
-    def __repr__(self):
-        return self.__str__()
+    # def __repr__(self):
+    #     return self.__str__()
 
-    def __eq__(self, other):
-        if not isinstance(other, NodeMapping):
-            return False
-        if self.nid != other.nid:
-            return False
-        if self.caption != other.caption:
-            return False
-        if self.labels != other.labels:
-            return False
-        if self.properties != other.properties:
-            return False
-        if self.count_generator != other.count_generator:
-            return False
-        if self.count_args != other.count_args:
-            return False
-        if self.default_count != other.default_count:
-            return False
-        if self.key_property != other.key_property:
-            return False
-        return True
+    # def __eq__(self, other):
+    #     if not isinstance(other, NodeMapping):
+    #         return False
+    #     if self.nid != other.nid:
+    #         return False
+    #     if self.caption != other.caption:
+    #         return False
+    #     if self.labels != other.labels:
+    #         return False
+    #     if self.properties != other.properties:
+    #         return False
+    #     if self.count_generator != other.count_generator:
+    #         return False
+    #     if self.count_args != other.count_args:
+    #         return False
+    #     if self.default_count != other.default_count:
+    #         return False
+    #     if self.key_property != other.key_property:
+    #         return False
+    #     return True
 
     def to_dict(self):
         properties = {}
@@ -120,43 +121,47 @@ class NodeMapping():
         # ]
         count = 0
         all_results = []
+
         if self.count_generator is None:
-            logging.info(f'node_mapping.py: NodeMapping.generate_values(): No COUNT generator assigned. Using default count for node mapping \'{self.caption}\'')
+            ModuleLogger().debug(f'No COUNT generator assigned to node with caption {self.caption}. Using default count {self.default_count}')
             count = self.default_count
         else:
             # Have a count generator to use
             # Will throw an exception if the count generator fails
             count = self.count_generator.generate(self.count_args)
-            if isinstance(count, int) == False:
-                raise Exception(f"Node mapping count_generator returned a non-integer value: {count}. Check code for generator: {self.count_generator.label}")
 
-        try:
-            for _ in range(count):
-                node_result = {}
-                # logging.info(f'node_mapping.py: NodeMapping.generate_values() generating values for node mapping \'{self.caption}\' with properties {self.properties}')
-                for property_id, property in self.properties.items():
-                    # Pass literal values
-                    if isinstance(property, PropertyMapping) == False:
-                        node_result[property_id] = property
-                        logging.warning(f'Node mapping properties contains a non-PropertyMapping object: {property}')
+            if isinstance(count, int) == False:
+                ModuleLogger().error(f'Count generator did not produce an int value: count read: {count}')
+                raise Exception(f"Node mapping count_generator returned a non-integer value: {count}. Check code for generator: {self.count_generator.name}")
+        
+
+        for _ in range(count):
+            node_result = {}
+            for property_id, property in self.properties.items():
+                # Pass literal values
+                if isinstance(property, PropertyMapping) == False:
+                    node_result[property_id] = property
+                    ModuleLogger().warning(f'Node mapping properties contains a non-PropertyMapping object: {property}')
+                    continue
+
+                # Have PropertyMapping generate a value
+                try:
+                    values = property.generate_values()
+                    if len(values) > 1:
+                        ModuleLogger().error(f'Property naemd {property.name} generated more than one value: {values}')
+                    value = values[0]
+                    if value is None:
+                        ModuleLogger().warning(f'Node mapping could not generate value for property: {property}')
                         continue
-                    # Have PropertyMapping generate a value
-                    try:
-                        value = property.generate_value()
-                        if value is None:
-                            logging.warning(f'Node mapping could not generate value for property: {property}')
-                            continue
-                        node_result[property.name] = value
-                    except Exception as e:
-                        logging.error(f'Node mapping failed to generate values for property: {property}. Error: {e}')
-                        raise e
-                # node_result["_uid"] = f"{self.id}_{str(uuid.uuid4())[:8]}"
-                all_results.append(node_result)
-        except Exception as e:
-            raise Exception(f"Node mapping could not generate property values, error: {e}")
-            # raise Exception(f"Node mapping could not generate property values, error: {str(sys.exc_info()[0])}")
+                    node_result[property.name] = value
+                except Exception as e:
+                    ModuleLogger().error(f'Node mapping failed to generate values for property: {property}. Error: {e}')
+                    raise e
+            all_results.append(node_result)
         
         # Store and return all_results
         self.generated_values = all_results
+
+        ModuleLogger().debug(f'Node mapping named {self.caption} finished generating {len(self.generated_values)} values')
 
         return self.generated_values

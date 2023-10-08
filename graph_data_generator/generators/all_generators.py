@@ -1,10 +1,81 @@
 
-# Attempts to import by filename when in a package did not work - so importing all the generator files explicitly here
-from graph_data_generator.generators import bool, catch_phrase, city, company_name, country, date, email, exhaustive_random, first_name, float_from_list, float_range, int_from_list, int, int_range, last_name, lorem_paragraphs, loremtext_sentence, loremtext_words, md5, pure_random, string_from_csv, string_from_list, string_literal, technical_phrase, uri, uuid
+# Attempts to import by filename when in a package did not work - so importing all the generator files explicitly here. This is not ideal but works for now.
 
+from graph_data_generator.models.generator import generators_from_json
+
+# Regular generators
+from graph_data_generator.generators import bool, catch_phrase, city, company_name, country, date, email, exhaustive_random, first_name, float, float_from_list, float_range, int, int_from_list, int_range, last_name, lorem_paragraphs, loremtext_sentence, loremtext_words, md5, pure_random, string_from_csv, string_from_list, string_literal, technical_phrase, uri, uuid
+
+# Functional genertators
+from graph_data_generator.generators import add_floats, add_ints, add_strings
+
+# key name and generator name somewhat duplicitous currently. Keys will remain unchanged, but name add separately to support multi-lingu support (someday) 
 generators_json = {
     "README":{
         "content": "This is the default list of all generators used by the app. If you add new generators they will be added to this file. The default_generators.json file contains a copy of this from the repo maintainer(s)"
+    },
+    "add_ints": {
+        "args": [
+            {
+                "default": "",
+                "label": "Generator Specifications",
+                "type": "String"
+            }
+        ],
+        "code": add_ints,
+        "description": "Combines output from a list of other generators into a single integer value",
+        "name": "Add Integers",
+        "tags": [
+            "function",
+            "int",
+            "integer",
+            "integers"
+            "generators",
+            "sum",
+            "combine"
+        ],
+        "type": "Function"
+    },
+    "add_floats": {
+        "args": [
+            {
+                "default": "",
+                "label": "Generator Specifications",
+                "type": "String"
+            }
+        ],
+        "code": add_floats,
+        "description": "Combines output from a list of other generators into a single float value",
+        "name": "Add Floats",
+        "tags": [
+            "function",
+            "float",
+            "numbers",
+            "generators",
+            "sum",
+            "combine"
+        ],
+        "type": "Function"
+    },
+    "add_strings": {
+        "args": [
+            {
+                "default": "",
+                "label": "Generator Specifications",
+                "type": "String"
+            }
+        ],
+        "code": add_strings,
+        "description": "Combines output from a list of other generators into a single string",
+        "name": "Add Strings",
+        "tags": [
+            "function",
+            "string",
+            "generators",
+            "aggregate",
+            "combine"
+        ],
+        "type": "Function"
     },
     "bool": {
         "args": [
@@ -149,6 +220,28 @@ generators_json = {
         ],
         "type": "Float"
     },
+    "float": {
+        "args": [
+            {
+                "default": 0.0,
+                "label": "Value",
+                "type": "Float"
+            }
+        ],
+        "code": float,
+        "description": "Literal float value",
+        "name": "Float",
+        "tags": [
+            "float",
+            "decimal",
+            "number",
+            "num",
+            "count",
+            "cost",
+            "price"
+        ],
+        "type": "Float"
+    },
     "float_range": {
         "args": [
             {
@@ -169,7 +262,7 @@ generators_json = {
         ],
         "code": float_range,
         "description": "Random float between a range. Inclusive.",
-        "name": "Float",
+        "name": "Float from range",
         "tags": [
             "float",
             "decimal",
@@ -474,3 +567,14 @@ generators_json = {
         "type": "String"
     }
 }
+
+
+generators = generators_from_json(generators_json)
+
+# function_generators = generators_from_json(function_generators_json)
+
+# def new_generators_list():
+    # return generators_from_json(generators_json)
+
+# def new_function_generators_list():
+#     return generators_from_json(function_generators_json)

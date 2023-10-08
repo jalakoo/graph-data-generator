@@ -1,8 +1,10 @@
 from graph_data_generator.models.node_mapping import NodeMapping
 from graph_data_generator.models.relationship_mapping import RelationshipMapping
 from graph_data_generator.models.property_mapping import PropertyMapping
-import logging
+from graph_data_generator.logger import ModuleLogger
+
 import datetime
+
 
 # For generating new mock data, we only need part of the information found in an entire data importer .json file
 data_importer_import_schema = {
@@ -156,7 +158,7 @@ class DataImporterJson():
 
         caption = nodeMapping.caption
         if caption is None:
-            logging.error(f"Node {nodeMapping} does not have a caption")
+            ModuleLogger().error(f"Node {nodeMapping} does not have a caption")
 
         # Add to graph:nodes
         self.data["graph"]["nodes"].append({

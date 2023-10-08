@@ -1,6 +1,7 @@
 # from enum import Enum, unique
 from graph_data_generator.models.generator_type import GeneratorType
 from graph_data_generator.models.generator_arg import GeneratorArg
+from graph_data_generator.logger import ModuleLogger
 import re
 
 
@@ -11,6 +12,8 @@ class Generator():
     def from_dict(
         generator_dict: dict
     ):
+        if 'gid' not in generator_dict.keys():
+            raise Exception("Generator must have a gid property")
         if 'name' not in generator_dict.keys():
             raise Exception("Generator must have a name")
         if 'type' not in generator_dict.keys():
@@ -30,6 +33,7 @@ class Generator():
         
         return Generator(
             type = GeneratorType.type_from_string(generator_dict['type']),
+            gid = generator_dict['gid'],
             name = generator_dict['name'],
             description = generator_dict['description'],
             code = generator_dict['code'],
@@ -40,6 +44,7 @@ class Generator():
     @staticmethod
     def empty():
         return Generator(
+            gid = "",
             type = GeneratorType.UNKNOWN,
             name = "",
             description = "",
@@ -50,6 +55,7 @@ class Generator():
     
     def __init__(
         self, 
+        gid: str,
         name: str, 
         type : GeneratorType, 
         description: str, 
@@ -59,6 +65,7 @@ class Generator():
         args: list[GeneratorArg],
         tags: list[str]
         ):
+        self.gid = gid
         self.name = name
         self.description = description
         self.code = code
@@ -66,11 +73,9 @@ class Generator():
         self.type = type
         self.tags = tags
 
-
-
-
     def to_dict(self):
         return {
+            "gid": self.gid,
             "name": self.name,
             "description": self.description,
             "code": self.code.name,
@@ -80,13 +85,15 @@ class Generator():
         }
 
     def __str__(self):
-        return f'Generator: name: {self.name}, type: {self.type}, args: {self.args}'
+        return f'Generator: gid: {self.gid}, name: {self.name}, type: {self.type}, args: {self.args}'
 
     def __repr__(self):
         return self.__str__()
 
     def __eq__(self, other):
         if isinstance(other, Generator) == False:
+            return False
+        if self.gid != other.gid:
             return False
         if self.name != other.name:
             return False
@@ -102,9 +109,10 @@ class Generator():
             return False 
         return True
 
-    def generate(self, args):
+    def generate(self, args):  
         result = self.code.generate(args)
         return result
+    
 def generators_from_json(json : dict) -> dict:
     result = {}
     for key in json.keys():
@@ -112,7 +120,9 @@ def generators_from_json(json : dict) -> dict:
             # Special key for embedding notes in the json 
             # Hacky but whatever
             continue
-        generator = Generator.from_dict(json[key])
+        data = json[key]
+        data['gid'] = key
+        generator = Generator.from_dict(data)
         result[key] = generator
     return result
 

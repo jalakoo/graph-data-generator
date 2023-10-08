@@ -1,7 +1,8 @@
-from graph_data_generator.models.generator import Generator
+from graph_data_generator.models.generator import Generator, GeneratorType
 from graph_data_generator.utils.list_utils import clean_list
-
-class PropertyMapping():
+from graph_data_generator.models.base_mapping import BaseMapping
+from graph_data_generator.logger import ModuleLogger
+class PropertyMapping(BaseMapping):
 
     @staticmethod
     def empty():
@@ -29,11 +30,11 @@ class PropertyMapping():
         generator = self.generator if self.generator is not None else "<no_generator_assigned>"
         return f"PropertyMapping(pid={self.pid}, name={name}, generator={generator}, args={self.args}"
         
-    def __repr__(self):
-        return self.__str__()
+    # def __repr__(self):
+    #     return self.__str__()
 
-    def __equ__(self, other):
-        return self.pid == other.pid
+    # def __equ__(self, other):
+    #     return self.pid == other.pid
 
     def to_dict(self):
         return {
@@ -49,12 +50,13 @@ class PropertyMapping():
         if self.generator is None:
             return False
         return True
-
-    def generate_value(self):
+    
+    def generate_values(self) -> list[dict]:
+        
+        # Generator needed to be assigned before this call
         if self.generator == None:
-            raise Exception(f'Property Mapping is missing a generator property. Property name: {self.name}')
-        if isinstance(self.args, list) == False:
-            raise Exception(f'Property Mapping Args is not a list. Property name: {self.name}')
+            raise Exception(f'Property Mapping named {self.name} is missing a generator property.')
+
         result = self.generator.generate(self.args)
-        return result
+        return [result]
 

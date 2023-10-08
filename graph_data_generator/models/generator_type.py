@@ -8,8 +8,9 @@ class GeneratorType(Enum):
     FLOAT = 3,
     STRING = 4,
     DATETIME = 5,
-    ASSIGNMENT = 6
-    RELATIONSHIP = 7
+    ASSIGNMENT = 6,
+    RELATIONSHIP = 7,
+    FUNCTION = 8
 
     @staticmethod
     def type_from_string(aType: str):
@@ -20,6 +21,8 @@ class GeneratorType(Enum):
             return GeneratorType.INT
         elif type == "float":
             return GeneratorType.FLOAT
+        elif type =="function":
+            return GeneratorType.FUNCTION
         elif type == "datetime":
             return GeneratorType.DATETIME
         elif type == "bool":
@@ -45,6 +48,7 @@ class GeneratorType(Enum):
             GeneratorType.STRING: "String",
             GeneratorType.INT: "Integer",
             GeneratorType.FLOAT: "Float",
+            GeneratorType.FUNCTION: "Function",
             GeneratorType.DATETIME: "Datetime",
             GeneratorType.BOOL: "Bool",
             GeneratorType.ASSIGNMENT: "Assignment",

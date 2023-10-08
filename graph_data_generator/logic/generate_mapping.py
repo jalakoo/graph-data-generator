@@ -6,9 +6,9 @@ from graph_data_generator.models.mapping import Mapping
 from graph_data_generator.models.node_mapping import NodeMapping
 from graph_data_generator.models.relationship_mapping import RelationshipMapping
 from graph_data_generator.models.property_mapping import PropertyMapping
-from graph_data_generator.models.generator import Generator
+from graph_data_generator.models.generator import Generator, GeneratorType
 from graph_data_generator.logic.generate_values import generator_for_raw_property, assignment_generator_for
-import logging
+from graph_data_generator.logger import ModuleLogger
 
 # TODO: Update to return object, error_msg tuple
 def propertymappings_for_raw_properties(
@@ -29,7 +29,7 @@ def propertymappings_for_raw_properties(
     Parameters:
     
     raw_properties (dict): Raw property definitions from node or relationship
-    generators (dict): Available generator objects. [name : Generator] 
+    generators (dict): All available generator objects. [name : Generator] 
 
     Returns:
     dict: PropertyMapping objects keyed by property name 
@@ -46,6 +46,7 @@ def propertymappings_for_raw_properties(
         raw_properties["KEY"] = "_uid"
         raw_properties["_uid"] = f'{{"uuid":[]}}'
 
+    # Cycle through all properties and convert to a property mapping
     for key, value in raw_properties.items():
 
         # Skip any keys with { } (brackets) as these are special cases for defining count/assignment/filter generators
@@ -63,7 +64,7 @@ def propertymappings_for_raw_properties(
                 generator, args = generator_for_raw_property(f"{{string:[{value}]}}", generators)
             if generator is None:
                 # Targeted and fallback generator could not be found.
-                logging.warning(f'generate_mapping.py: propertymappings_for_raw_properties: could not find generator for key: {key}, property_value: {value}')
+                ModuleLogger().warning(f'generate_mapping.py: propertymappings_for_raw_properties: could not find generator for key: {key}, property_value: {value}')
                 continue
 
             # pid = str(uuid.uuid4())[:8]
@@ -76,7 +77,7 @@ def propertymappings_for_raw_properties(
             )
             property_mappings[pid] = property_mapping
         except Exception as e:
-            logging.warning(f'generate_mapping.py: propertymappings_for_raw_properties: could not create property mapping for key: {key}, property_value: {value}: {e}')
+            ModuleLogger().warning(f'generate_mapping.py: propertymappings_for_raw_properties: could not create property mapping for key: {key}, property_value: {value}: ERROR: {e}')
             continue
     return property_mappings
 
@@ -126,12 +127,12 @@ def node_mappings_from(
         # Incoming data validation
         position = node_dict.get("position", None)
         if position is None:
-            logging.warning(f"Node properties is missing position key from: {node_dict}: Skipping {node_dict}")
+            ModuleLogger().warning(f"Node properties is missing position key from: {node_dict}: Skipping {node_dict}")
             continue
 
         caption = node_dict.get("caption", None)
         if caption is None:
-            logging.warning(f"Node properties is missing caption key from: {node_dict}: Skipping {node_dict}")
+            ModuleLogger().warning(f"Node properties is missing caption key from: {node_dict}: Skipping {node_dict}")
             continue
 
         # Check for optional properties dict
@@ -143,23 +144,34 @@ def node_mappings_from(
         try: 
             property_mappings = propertymappings_for_raw_properties(properties, generators)
         except Exception as e:
-            logging.warning(f"Could not create property mappings for node: {node_dict}: {e}")
+            ModuleLogger().warning(f"Could not create property mappings for node: {node_dict}: {e}")
             continue
 
         # Determine count generator to use
-        # TODO: Support COUNT literal
         count_generator_config = properties.get("COUNT", None)
+
+        # Gross
+        # TODO: Cleanup
+
+        # Count literal
+        if count_generator_config is not None:
+            literal = "".join(["{", '\"int\"', ":", "[",f'{count_generator_config}', "]", "}"])
+            count_generator_config = literal
         if count_generator_config is None:
             count_generator_config = properties.get("{count}", None)
+            # Legacy count linteral
+            if count_generator_config is not None:
+                literal = "".join(["{", '\"int\"', ":", "[",f'{count_generator_config}', "]", "}"])
+                count_generator_config = literal
             if count_generator_config is None:
+                # Default to a random int range
                 count_generator_config = '{"int_range": [1,100]}'
-                logging.info(f"node properties is missing COUNT or {{count}} key from properties: {properties}: Using defalt int_range generator")
 
         # Get proper generators for count generator
         try:
             count_generator, count_args = generator_for_raw_property(count_generator_config, generators)
         except Exception as e:
-            logging.warning(f"Could not find count generator for node: {node_dict}: {e}")
+            ModuleLogger().warning(f"Could not find count generator for node: {node_dict}: {e}")
             continue
 
         # Get string name for key property. Value should be an unformatted string
@@ -168,13 +180,15 @@ def node_mappings_from(
             key = properties.get("{key}", None)
             if key is None:
                 key = "_uid"
-                logging.info(f"node properties is missing KEY or {{key}}: Assigning self generated _uid")
+                ModuleLogger().debug(f"node properties is missing KEY or {{key}}: Assigning self generated _uid")
 
         # Assign correct property mapping as key property
         key_property = next((v for k,v in property_mappings.items() if v.name == key), None)
         if key_property is None:
-            logging.warning(f"Key property mapping not found for node: {node_dict} - key name: {key}. Skipping node.")
+            ModuleLogger().warning(f"Key property mapping not found for node: {node_dict} - key name: {key}. Skipping node.")
             continue
+
+        # ModuleLogger().debug(f'Creating node mapping with caption: {caption}. Propery Mappings: {property_mappings.items()}')
 
         # Create node mapping
         node_mapping = NodeMapping(
@@ -248,7 +262,7 @@ def relationshipmappings_from(
             count_generator_config = properties.get("{count}", None)
             if count_generator_config is None:
                 count_generator_config = '{"int_range": [1,3]}'
-                logging.info(f"Relationship properties is missing COUNT or '{{count}}' key from properties: {properties}: Using default int_range generator")
+                ModuleLogger().debug(f"Relationship properties is missing COUNT or '{{count}}' key from properties: {properties}: Using default int_range generator")
 
         assignment_generator_config = properties.get("ASSIGNMENT", None)
         if assignment_generator_config is None:
@@ -261,7 +275,7 @@ def relationshipmappings_from(
         try:
             count_generator, count_args = generator_for_raw_property(count_generator_config, generators)
         except Exception as e:
-            raise Exception(f"Could not find count generator for relationship: {relationship_dict}: {e}")
+            raise Exception(f"Could not find count generator for relationship: {relationship_dict}: COUNT CONFIG: {count_generator_config}: ERROR: {e}")
 
         # Create property mappings for properties
         try:
