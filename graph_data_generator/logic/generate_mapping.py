@@ -262,7 +262,7 @@ def relationshipmappings_from(
             count_generator_config = properties.get("{count}", None)
             if count_generator_config is None:
                 count_generator_config = '{"int_range": [1,3]}'
-                ModuleLogger().debug(f"Relationship properties is missing COUNT or '{{count}}' key from properties: {properties}: Using default int_range generator")
+                ModuleLogger().debug(f"{relationship_dict} relationship properties is missing COUNT or '{{count}}' key from properties: {properties}: Using default int_range generator")
 
         assignment_generator_config = properties.get("ASSIGNMENT", None)
         if assignment_generator_config is None:

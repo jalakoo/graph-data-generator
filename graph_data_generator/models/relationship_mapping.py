@@ -121,6 +121,7 @@ class RelationshipMapping():
 
         # Make a copy of the generated list
         values = deepcopy(self.to_node.generated_values)
+        original_values = deepcopy(self.to_node.generated_values)
 
         # Iterate through every generated source node
         for value_dict in self.from_node.generated_values:
@@ -130,6 +131,7 @@ class RelationshipMapping():
             count = 0
             try:
                 count = self.count_generator.generate(self.count_args)
+                ModuleLogger.debug(f'{self.from_node.caption} node: {self.type} relationship count: {count}')
             except:
                 # Generator not found or other code error
                 raise Exception(f"Relationship mapping could not generate a number of relationships to continue generation process, error: {str(sys.exc_info()[0])}")
@@ -152,8 +154,8 @@ class RelationshipMapping():
                 # Select a random target node
 
                 if values is None or len(values) == 0:
-                    # TODO: This appears to break the randomization
-                    continue
+                    # Reset
+                    values = original_values
 
                 # Extract results. Values will be passed back through the next iteration in case the generator returns a modified list
 

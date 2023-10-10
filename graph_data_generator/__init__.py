@@ -12,8 +12,60 @@ from graph_data_generator.models.generator_type import GeneratorType
 from graph_data_generator.generators.ALL_GENERATORS import generators
 from graph_data_generator.logger import ModuleLogger
 
-VERSION = "0.2.0"
+VERSION = "0.3.0"
 
+
+def generate_to_neo4j(
+    json_source: str,
+    neo4j_uri: str,
+    neo4j_user: str,
+    neo4j_pass: str,
+    overwrite_db: bool = True
+):
+    raise Exception("Unimplemented")
+
+    
+def generate_relationship_csvs(nodes_source: any):
+    raise Exception("Unimplemented")
+
+def generate_nodes_csvs(nodes_source: any):
+    raise Exception("Unimplemented")
+
+     
+def generate_csvs(
+    json_source: str,
+    enable_logging : bool = False
+):
+    if enable_logging is True:
+        logger = ModuleLogger()
+        logger.is_enabled = True
+        logger.info(f'Logging enabled')
+        # TODO: Update to write to file
+
+    if isinstance(json_source, str) is True:
+        try:
+            json_source = json.loads(json_source)
+        except Exception as e:
+            raise Exception(f'json_source string not a valid JSON format: {e}')
+        
+    raise Exception("Unimplemented")
+
+    
+def generate_zip(
+    json_source: str,
+    filename: str = "mock_data",
+    enable_logging : bool = False       
+):
+    csvs = generate_csvs(
+        json_source,
+        enable_logging)
+    
+
+    # TODO: add .csvs and .log file to output zip
+    raise Exception("unimplemented")
+
+# OLD Generate method
+# TODO update to call the generate_zip method
 def generate(
     json_source : any,
     output_format : str = 'bytes',
