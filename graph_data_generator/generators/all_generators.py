@@ -13,6 +13,7 @@ from graph_data_generator.generators import add_floats, add_ints, add_strings
 from graph_data_generator.generators import reference
 
 # key name and generator name somewhat duplicitous currently. Keys will remain unchanged, but name add separately to support multi-lingu support (someday) 
+# this object can be read externally to reference available generators and data about them.
 generators_json = {
     "README":{
         "content": "This is the default list of all generators used by the app. If you add new generators they will be added to this file. The default_generators.json file contains a copy of this from the repo maintainer(s)"
@@ -588,13 +589,4 @@ generators_json = {
     }
 }
 
-
 generators = generators_from_json(generators_json)
-
-# function_generators = generators_from_json(function_generators_json)
-
-# def new_generators_list():
-    # return generators_from_json(generators_json)
-
-# def new_function_generators_list():
-#     return generators_from_json(function_generators_json)

@@ -4,6 +4,8 @@ import json
 
 from graph_data_generator.logic.generate_zip import generate_zip
 from graph_data_generator.logic.generate_mapping import mapping_from_json
+from graph_data_generator.logic.generate_nodes import generate_nodes
+from graph_data_generator.logic.generate_relationships import generate_relationships
 
 # Here also to expose for external use
 from graph_data_generator.models.generator import Generator, generators_from_json
@@ -13,29 +15,67 @@ from graph_data_generator.generators.ALL_GENERATORS import generators
 from graph_data_generator.logger import ModuleLogger
 
 VERSION = "0.3.0"
-
-
-# def generate_to_neo4j(
-#     json_source: str,
-#     neo4j_uri: str,
-#     neo4j_user: str,
-#     neo4j_pass: str,
-#     overwrite_db: bool = True
-# ):
-#     raise Exception("Unimplemented")
-
     
-def generate_relationship_csvs(nodes_source: any):
+def enable_logging(enable: bool = True):
+    if enable_logging is True:
+        logger = ModuleLogger()
+        logger.is_enabled = True
+        logger.info("Graph-Data-Generator logging enabled")
+
+def generate_relationship_csvs(relationships: list[dict], nodes: dict):
     raise Exception("Unimplemented")
 
-def generate_nodes_csvs(nodes_source: any):
+def generate_nodes_csvs(nodes: list[dict]):
     raise Exception("Unimplemented")
 
-     
-def generate_csvs(
-    json_source: str,
-    enable_logging : bool = False
-) -> list[(str, list[str])]:
+
+
+def generate_dicts(input: str|dict) -> dict:
+    """Generates a dictionary of nodes and relationships records.
+
+    Args:
+        input: Stringified JSON object or dictionary of configuration information
+        enable_logging: Whether to pass logging info to shared default Python logging module
+
+    Returns:
+        A dictionary with generated nodes and relationship records
+    """
+    
+    # Convert json string to dict
+    if isinstance(input, str):
+        try:
+            input = json.loads(input)
+        except Exception as e:
+            message = f'{e}. Checking validity of input configuration file'
+            ModuleLogger.error(message)
+            raise e
+        
+    # Confirm we have a dict
+    if isinstance(input, dict) == False:
+        message = f'Expecting a string or dictionary as an input file. Instead got {input}'
+        ModuleLogger.error(message)
+        raise Exception(message)
+
+    # Check dict has minimum data
+    nodes = input.get('nodes', None)
+    if nodes is None:
+        message = f'"nodes" key required from inpute file: {input}'
+        ModuleLogger.error(message)
+        raise Exception(message)
+    
+    # Generate node records
+    node_dicts = generate_nodes(nodes, enable_logging)
+    output = {'nodes': node_dicts}
+
+    # Optionally generate relationship records
+    rels = input.get('relationships', None)
+    if rels is not None:
+        rel_dicts = generate_relationships(rels, node_dicts, enable_logging)
+        output['relationships'] = rel_dicts
+    
+    return output
+
+def generate_csvs(json_source: str) -> list[(str, list[str])]:
     """Generates a list of tuples containing (filename, csv string).
 
     Args:
@@ -46,19 +86,19 @@ def generate_csvs(
         A list of tuples containing (filename, stringified csv) or None if an exception caught
     """
     
-    if enable_logging is True:
-        logger = ModuleLogger()
-        logger.is_enabled = True
-        logger.info(f'Logging enabled')
+    # if enable_logging is True:
+    #     logger = ModuleLogger()
+    #     logger.is_enabled = True
+    #     logger.info(f'Logging enabled')
         # TODO: Update to write to file
 
-    if isinstance(json_source, str) is True:
-        try:
-            json_source = json.loads(json_source)
-        except Exception as e:
-            if logger:
-                logger.error(f'Invalid source JSON: {e}: Check if json_source is a valid JSON string')
-            return None
+    # if isinstance(json_source, str) is True:
+    #     try:
+    #         json_source = json.loads(json_source)
+    #     except Exception as e:
+    #         if logger:
+    #             logger.error(f'Invalid source JSON: {e}: Check if json_source is a valid JSON string')
+    #         return None
         
     # TODO: Generate csv of nodes
     # TODO: Generate csv of relationships
@@ -70,7 +110,6 @@ def generate_zip(
     json_source: str,
     filename: str = "mock_data",
     include_logs: bool = True,
-    enable_logging : bool = False,
 ):
     
     """Generates a zip file containing a series of .csv files and an optional .log file.
@@ -92,8 +131,8 @@ def generate_zip(
     # TODO: add .csvs and .log file to output zip
     raise Exception("unimplemented")
 
-# OLD Generate method
-# TODO update to call the generate_zip method
+# DEPRECATING this original method
+# TODO update to call the generate_zip method instead
 def generate(
     json_source : any,
     output_format : str = 'bytes',
@@ -133,6 +172,7 @@ def generate(
             raise Exception(f'json_source string not a valid JSON format: {e}')
     
     # TODO: Check the dict key-value format matches what we're expecting
+    
     
     # Create mapping file
     mapping, error_msg = mapping_from_json(

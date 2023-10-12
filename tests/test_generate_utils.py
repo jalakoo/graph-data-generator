@@ -2,25 +2,6 @@
 import pytest
 from graph_data_generator.logic.generate_utils import property_contains_reference_generator, preprocess_nodes, preprocess_relationships, convert_dict_to_csv, reference_generator_names_only
 
-# class TestPropertyContainsPointerDesignator:
-#     def test_property_contains_pointer_designator_true(self):
-#         obj = {'prop1': '@node1'}
-#         assert property_contains_pointer_designator(obj)
-
-#     def test_property_contains_pointer_designator_false(self):
-#         obj = {'prop1': 'value1'}
-#         assert not property_contains_pointer_designator(obj)
-
-#     def test_property_contains_pointer_designator_escaped(self):
-#         obj = {'prop1': '\\@value1'}    # Would pass a non-pointer string of value @value1
-#         obj2 = {'prop1': '@\\@value1'}  # Would pass as pointer value @value1
-#         obj3 = {'prop1': '\\@@value1'}  # Would pass as pointer value @value1
-#         obj4 = {'prop1': '@@value1'}    # Would pass as pointer value @value1
-#         assert not property_contains_pointer_designator(obj)
-#         assert property_contains_pointer_designator(obj2)
-#         assert property_contains_pointer_designator(obj3)
-#         assert property_contains_pointer_designator(obj4)
-
 class TestReferenceGeneratorsOnly:
     # Currently only a single 'reference' reference generator available
 

@@ -4,6 +4,7 @@ class ModuleLogger(object):
 
     is_enabled : bool = False
     _logger = None
+
     def __new__(cls):
         if not hasattr(cls, 'instance'):
             cls.instance = super(ModuleLogger, cls).__new__(cls)
@@ -56,18 +57,15 @@ class ModuleLogger(object):
         pass
 
 class EmptyLogger:
-
+    
     def notset(self, arg:str):
         pass
     def debug(self, arg: str):
         pass
-
     def info(self, arg: str):
         pass
-
     def warning(self, arg: str):
         pass
-
     def error(self, arg: str):
         pass
     def critical(self, arg: str):

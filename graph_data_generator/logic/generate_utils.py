@@ -1,11 +1,5 @@
-import re
-from graph_data_generator.generators.ALL_GENERATORS import generators_json
 import json
-
-# def property_contains_pointer_designator(obj: dict) -> bool:
-#     # Does a dictionary from a properties list contain a special param pointer prefix?
-#     pattern = r'(?<!\\)@'
-#     return any(bool(re.findall(pattern,value)) for value in obj.values() if isinstance(value, str))
+from graph_data_generator.generators.ALL_GENERATORS import generators_json
 
 reference_generator_names_only = [name for name, specs in generators_json.items() if specs.get('type', '').lower() == 'reference']
 
