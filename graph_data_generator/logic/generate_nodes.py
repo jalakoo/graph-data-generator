@@ -91,10 +91,11 @@ def generate_nodes(input: list[dict]) -> dict:
     for node_spec in cleaned_sorted_input:
         id = node_spec.get('id', None)
 
-        # Redundnat as Id check should have already occurred in preprocess_nodes()
+        # Redundant as id check should have already occurred in preprocess_nodes()
         if id is None:
             continue
 
+        # TODO: Support for cross node reference generators / pointers will likely go here
         node_records = generate_node_records(node_spec)
         output[id] = node_records
     

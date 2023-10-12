@@ -64,13 +64,13 @@ def generate_dicts(input: str|dict) -> dict:
         raise Exception(message)
     
     # Generate node records
-    node_dicts = generate_nodes(nodes, enable_logging)
+    node_dicts = generate_nodes(nodes)
     output = {'nodes': node_dicts}
 
     # Optionally generate relationship records
     rels = input.get('relationships', None)
-    if rels is not None:
-        rel_dicts = generate_relationships(rels, node_dicts, enable_logging)
+    if rels is not None and len(rels) > 0:
+        rel_dicts = generate_relationships(rels, node_dicts)
         output['relationships'] = rel_dicts
     
     return output
