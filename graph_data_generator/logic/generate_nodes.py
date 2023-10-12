@@ -46,9 +46,19 @@ def generate_node_records(input: dict) -> list[dict]:
 
     # Generate records
     output = []
+
+    # Coalesce caption and labels into one list and add to records
+    labels = input.get('labels', [])
+    key_label = input.get('caption', None)
+    if key_label is not None:
+        labels.insert(0, key_label)
+
     for _ in range(count):
         # Generate a single node record
         node = generate_a_node_record(input)
+
+        node["_labels"] = labels
+
         output.append(node)
     return output
 

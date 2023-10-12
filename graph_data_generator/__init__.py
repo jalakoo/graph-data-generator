@@ -21,7 +21,7 @@ VERSION = "0.3.0"
 logger = ModuleLogger()
 logger.is_enabled = False
   
-def enable_logging():
+def enable_logger():
     logger = ModuleLogger()
     logger.is_enabled = True
     logger.info("Graph-Data-Generator logging enabled")
@@ -93,11 +93,11 @@ def generate_csvs(input: str | dict) -> list[(str, list[str])]:
 
     output = []
     for nid, nodes in all_nodes.items():
-        caption = nodes[0]['caption']
+        caption = nodes[0]['_labels'][0]
         output.append(convert_dicts_to_csv(f'{caption}_{nid}.csv', nodes))
 
     for rid, rels in all_relationships.items():
-        type = rels[0]['type']
+        type = rels[0]['_type']
         output.append(convert_dicts_to_csv(f'{type}_{rid}.csv', rels))
 
     return output
@@ -133,73 +133,82 @@ def generate_zip(
 
     return in_memory_data
 
-# DEPRECATING this original method
-# TODO update to call the generate_zip method instead
 def generate(
     json_source : any,
     output_format : str = 'bytes',
     enable_logging : bool = False
 ) -> io.BytesIO:
-    """
-    Generates a zip file of data based on the provided JSON object.
+    if enable_logging:
+        enable_logger()
+    return generate_zip(json_source)
 
-    Args:
-        json_source (any): A stringified JSON or dict object containing the mapping of nodes and relationships to generate.
-        output_format (str, optional): The format of the output. Defaults to 'bytes' which can be added directly to a flask make_response() call. Otther options are 'string'.
-    """
-    # Validate json
+# DEPRECATING this original method
+# TODO update to call the generate_zip method instead
+# def generate(
+#     json_source : any,
+#     output_format : str = 'bytes',
+#     enable_logging : bool = False
+# ) -> io.BytesIO:
+#     """
+#     Generates a zip file of data based on the provided JSON object.
 
-    # jsonschema package did not work with pytest
-    # from jsonschema import validate
-    # try:
-    #     validate(instance=json_object, schema=arrows_json_schema)
-    # except jsonschema.exceptions.ValidationError as e:
-    #     raise Exception("Invalid JSON object provided.")
-    # except jsonschema.exceptions.SchemaError as e:
-    #     raise Exception("Base JSON schema invalid. Contact developer")
-    # except Exception as e:
-    #     raise Exception(f"Unknown error validating JSON object. {e} Contact developer")
+#     Args:
+#         json_source (any): A stringified JSON or dict object containing the mapping of nodes and relationships to generate.
+#         output_format (str, optional): The format of the output. Defaults to 'bytes' which can be added directly to a flask make_response() call. Otther options are 'string'.
+#     """
+#     # Validate json
 
-    # TODO: Replace with a enum for output_format or arg for a logger object
-    if enable_logging is True:
-        logger = ModuleLogger()
-        logger.is_enabled = True
-        logger.info(f'Logging enabled')
+#     # jsonschema package did not work with pytest
+#     # from jsonschema import validate
+#     # try:
+#     #     validate(instance=json_object, schema=arrows_json_schema)
+#     # except jsonschema.exceptions.ValidationError as e:
+#     #     raise Exception("Invalid JSON object provided.")
+#     # except jsonschema.exceptions.SchemaError as e:
+#     #     raise Exception("Base JSON schema invalid. Contact developer")
+#     # except Exception as e:
+#     #     raise Exception(f"Unknown error validating JSON object. {e} Contact developer")
 
-    # If json_object is a string, load and convert into a dict object
-    if isinstance(json_source, str) is True:
-        try:
-            json_source = json.loads(json_source)
-        except Exception as e:
-            raise Exception(f'json_source string not a valid JSON format: {e}')
+#     # TODO: Replace with a enum for output_format or arg for a logger object
+#     if enable_logging is True:
+#         logger = ModuleLogger()
+#         logger.is_enabled = True
+#         logger.info(f'Logging enabled')
+
+#     # If json_object is a string, load and convert into a dict object
+#     if isinstance(json_source, str) is True:
+#         try:
+#             json_source = json.loads(json_source)
+#         except Exception as e:
+#             raise Exception(f'json_source string not a valid JSON format: {e}')
     
-    # TODO: Check the dict key-value format matches what we're expecting
+#     # TODO: Check the dict key-value format matches what we're expecting
     
     
-    # Create mapping file
-    mapping, error_msg = mapping_from_json(
-        json_source, 
-        generators
-    )
-    if mapping is None:
-        raise Exception(error_msg)
-    if mapping.is_empty():
-        raise Exception(f"No nodes or relationships generated. Check input file")
+#     # Create mapping file
+#     mapping, error_msg = mapping_from_json(
+#         json_source, 
+#         generators
+#     )
+#     if mapping is None:
+#         raise Exception(error_msg)
+#     if mapping.is_empty():
+#         raise Exception(f"No nodes or relationships generated. Check input file")
 
-    # Generate output and return as bytes of a zip file
-    bytes, error_msg = generate_zip(
-        mapping
-    )
-    if bytes is None:
-        raise Exception(error_msg)
-    if error_msg is not None:
-        ModuleLogger().error(error_msg)
+#     # Generate output and return as bytes of a zip file
+#     bytes, error_msg = generate_zip(
+#         mapping
+#     )
+#     if bytes is None:
+#         raise Exception(error_msg)
+#     if error_msg is not None:
+#         ModuleLogger().error(error_msg)
 
-    if output_format == 'string':
-        data_bytes = bytes.getvalue()
-        result = data_bytes.decode('utf-8')
-    else:
-        bytes.seek(0)
-        result = bytes.getvalue()
+#     if output_format == 'string':
+#         data_bytes = bytes.getvalue()
+#         result = data_bytes.decode('utf-8')
+#     else:
+#         bytes.seek(0)
+#         result = bytes.getvalue()
 
-    return result
+#     return result

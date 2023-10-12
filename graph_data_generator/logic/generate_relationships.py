@@ -65,6 +65,10 @@ def generate_relationship_records(input: dict, nodes:dict) -> dict:
 
     # Generate relationship from each from node (if count > 0)
     output = []
+
+    # Insert relationship type to record
+    type = input.get('type', None)
+        
     for f_node in from_nodes:
         fid = f_node.get('_uid', None)
         if fid is None:
@@ -86,11 +90,17 @@ def generate_relationship_records(input: dict, nodes:dict) -> dict:
             tid = to_node.get('_uid', None)
             if tid is None:
                 raise Exception(f'Target node record is missing _uid: {to_node}')
+            
             # Generate a single record _uid and prop values
             record = generate_relationship_properties(properties)
+
             # Insert from and to node _uids
             record["_from__uid"] = fid
             record["_to__uid"] = tid
+
+            if type is not None:
+                record['_type'] = type
+
             output.append(record)
     return output
 
