@@ -73,6 +73,10 @@ def generate_relationship_records(input: dict, nodes:dict) -> dict:
         count_generator, args = count_generator_from(properties)
         count = count_generator.generate(args)
         for _ in range(count):
+            if len(to_nodes_copy) == 0:
+                # No more target nodes to attach to
+                continue
+
             # Determine target node to connect to
             to_node, remaining_nodes = assign_generator.generate(to_nodes_copy)
             

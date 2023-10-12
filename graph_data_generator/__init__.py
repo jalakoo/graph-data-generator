@@ -1,11 +1,13 @@
 
 import io
 import json
+import zipfile
 
 from graph_data_generator.logic.generate_zip import generate_zip
 from graph_data_generator.logic.generate_mapping import mapping_from_json
 from graph_data_generator.logic.generate_nodes import generate_nodes
 from graph_data_generator.logic.generate_relationships import generate_relationships
+from graph_data_generator.logic.generate_utils import convert_dicts_to_csv
 
 # Here also to expose for external use
 from graph_data_generator.models.generator import Generator, generators_from_json
@@ -15,21 +17,16 @@ from graph_data_generator.generators.ALL_GENERATORS import generators
 from graph_data_generator.logger import ModuleLogger
 
 VERSION = "0.3.0"
-    
-def enable_logging(enable: bool = True):
-    if enable_logging is True:
-        logger = ModuleLogger()
-        logger.is_enabled = True
-        logger.info("Graph-Data-Generator logging enabled")
 
-def generate_relationship_csvs(relationships: list[dict], nodes: dict):
-    raise Exception("Unimplemented")
+logger = ModuleLogger()
+logger.is_enabled = False
+  
+def enable_logging():
+    logger = ModuleLogger()
+    logger.is_enabled = True
+    logger.info("Graph-Data-Generator logging enabled")
 
-def generate_nodes_csvs(nodes: list[dict]):
-    raise Exception("Unimplemented")
-
-
-
+# TODO: labels are stripped in return - add back in or add to key somehow
 def generate_dicts(input: str|dict) -> dict:
     """Generates a dictionary of nodes and relationships records.
 
@@ -47,20 +44,17 @@ def generate_dicts(input: str|dict) -> dict:
             input = json.loads(input)
         except Exception as e:
             message = f'{e}. Checking validity of input configuration file'
-            ModuleLogger.error(message)
-            raise e
+            raise Exception(message)
         
     # Confirm we have a dict
     if isinstance(input, dict) == False:
         message = f'Expecting a string or dictionary as an input file. Instead got {input}'
-        ModuleLogger.error(message)
         raise Exception(message)
 
     # Check dict has minimum data
     nodes = input.get('nodes', None)
     if nodes is None:
-        message = f'"nodes" key required from inpute file: {input}'
-        ModuleLogger.error(message)
+        message = f'"nodes" key required from input file: {input}'
         raise Exception(message)
     
     # Generate node records
@@ -69,13 +63,13 @@ def generate_dicts(input: str|dict) -> dict:
 
     # Optionally generate relationship records
     rels = input.get('relationships', None)
-    if rels is not None and len(rels) > 0:
+    if rels is not None:
         rel_dicts = generate_relationships(rels, node_dicts)
         output['relationships'] = rel_dicts
     
     return output
 
-def generate_csvs(json_source: str) -> list[(str, list[str])]:
+def generate_csvs(input: str | dict) -> list[(str, list[str])]:
     """Generates a list of tuples containing (filename, csv string).
 
     Args:
@@ -83,53 +77,61 @@ def generate_csvs(json_source: str) -> list[(str, list[str])]:
         enable_logging: Enables logging to console
 
     Returns:
-        A list of tuples containing (filename, stringified csv) or None if an exception caught
+        A list of tuples containing (filename, stringified csv)
     """
     
-    # if enable_logging is True:
-    #     logger = ModuleLogger()
-    #     logger.is_enabled = True
-    #     logger.info(f'Logging enabled')
-        # TODO: Update to write to file
+    # Generate dictionary of records first
+    all_records = generate_dicts(input)
+    all_nodes = all_records.get('nodes', None)
+    all_relationships = all_records.get('relationships', None)
+            
+    if all_nodes is None:
+        raise Exception(f'No nodes generated for input: {input}')
 
-    # if isinstance(json_source, str) is True:
-    #     try:
-    #         json_source = json.loads(json_source)
-    #     except Exception as e:
-    #         if logger:
-    #             logger.error(f'Invalid source JSON: {e}: Check if json_source is a valid JSON string')
-    #         return None
-        
-    # TODO: Generate csv of nodes
-    # TODO: Generate csv of relationships
-    # TODO: Composite and return entire list
-    raise Exception("Unimplemented")
+    ModuleLogger().debug(f'records generated for nodes: {all_nodes.keys()}')
+    ModuleLogger().debug(f'records generated for relationships: {all_relationships.keys()}')
+
+    output = []
+    for nid, nodes in all_nodes.items():
+        caption = nodes[0]['caption']
+        output.append(convert_dicts_to_csv(f'{caption}_{nid}.csv', nodes))
+
+    for rid, rels in all_relationships.items():
+        type = rels[0]['type']
+        output.append(convert_dicts_to_csv(f'{type}_{rid}.csv', rels))
+
+    return output
 
     
 def generate_zip(
-    json_source: str,
-    filename: str = "mock_data",
-    include_logs: bool = True,
-):
+    input: str | dict,
+    filename: str = "mock_data"
+) -> io.BytesIO:
     
     """Generates a zip file containing a series of .csv files and an optional .log file.
 
     Args:
-        json_source: Source stringified JSON representation of a graph data model
+        input: Source stringified JSON representation of a graph data model
         filename: Optional filename for .zip file. Defaults to "mock_data.zip"
-        include_logs: Include logs in generated zip file. Defaults to True
-        enable_logging: Enables logging to console. Defaults to False
 
     Returns:
-        A list of tuples containing (filename, stringified csv) or None if an exception caught
+        A zip file of .csvs and a .json data-importer compatible file
     """
-    csvs = generate_csvs(
-        json_source,
-        enable_logging)
     
+    in_memory_data = io.BytesIO()
+    in_memory_zip = zipfile.ZipFile(
+        in_memory_data, "w", zipfile.ZIP_DEFLATED, False)
+    in_memory_zip.debug = 3 
 
-    # TODO: add .csvs and .log file to output zip
-    raise Exception("unimplemented")
+    csvs = generate_csvs(input)
+    ModuleLogger().debug(f'csvs files generated: {len(csvs)}')
+
+    for filename, records in csvs:
+        in_memory_zip.writestr(filename, records)
+
+    # TODO: Add in data-importer .json file
+
+    return in_memory_data
 
 # DEPRECATING this original method
 # TODO update to call the generate_zip method instead

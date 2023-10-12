@@ -1,7 +1,7 @@
 # Test the high level package functions
 
 import pytest
-from graph_data_generator import generate_dicts
+from graph_data_generator import generate_dicts, generate_csvs
 
 @pytest.fixture
 def sample_input():
@@ -55,3 +55,20 @@ class TestGenerateDicts:
     def test_generate_dicts_missing_nodes(self, sample_input_no_nodes):
         with pytest.raises(Exception):
             output = generate_dicts(sample_input_no_nodes) 
+
+class TestGenerateCSVs:
+    def test_generate_csvs_valid(self, sample_input):
+        output = generate_csvs(sample_input)
+        assert isinstance(output, list)
+        assert len(output) > 0
+        for filename, csv in output:
+            assert isinstance(filename, str)
+            assert isinstance(csv, str)
+
+    def test_generate_csvs_invalid_input(self):
+        with pytest.raises(Exception):
+            output = generate_csvs("invalid input")
+
+    def test_generate_csvs_empty_input(self):
+        with pytest.raises(Exception):
+            output = generate_csvs({})

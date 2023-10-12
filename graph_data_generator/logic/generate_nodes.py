@@ -97,6 +97,7 @@ def generate_nodes(input: list[dict]) -> dict:
 
         # TODO: Support for cross node reference generators / pointers will likely go here
         node_records = generate_node_records(node_spec)
+
         output[id] = node_records
     
     return output

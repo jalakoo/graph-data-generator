@@ -1,5 +1,6 @@
 import json
 from graph_data_generator.generators.ALL_GENERATORS import generators_json
+from graph_data_generator.logger import ModuleLogger
 
 reference_generator_names_only = [name for name, specs in generators_json.items() if specs.get('type', '').lower() == 'reference']
 
@@ -32,8 +33,7 @@ def property_contains_reference_generator(obj: str) -> bool:
             print(f'Value passed to property is not a reference generator: {obj}')
             return False
         return True
-    except Exception as e:
-        print(f'ERROR: {e}')
+    except:
         return False
 
 def preprocess_nodes(json: list[dict]) -> list[dict]:
@@ -51,7 +51,7 @@ def preprocess_nodes(json: list[dict]) -> list[dict]:
     #     }
     #   ]
 
-    filtered_list = [obj for obj in json if 'properties' in obj and 'id' in obj and 'caption' in obj and 'labels' in obj]
+    filtered_list = [obj for obj in json if 'properties' in obj and 'id' in obj and 'caption' in obj]
     filtered_list.sort(key=lambda x: properties_contain_a_reference_generator(x['properties'])) 
     return filtered_list
 
@@ -74,8 +74,8 @@ def preprocess_relationships(json: list[dict]) -> list[dict]:
     filtered_list.sort(key=lambda x: properties_contain_a_reference_generator(x['properties'])) 
     return filtered_list
 
-def convert_dict_to_csv(filename: str, dict: dict)-> tuple[str, str]:
-    """Converts a dictionary to a tuple filename, CSV string
+def convert_dicts_to_csv(filename: str, dicts: list[dict])-> (str, str):
+    """Converts a dictionary of {ids: list[dict]} to a filename, CSV string tuple
 
     Args:
         filename: filename for the csv file.
@@ -87,7 +87,7 @@ def convert_dict_to_csv(filename: str, dict: dict)-> tuple[str, str]:
     import csv
     from io import StringIO
 
-    fieldnames = dict[0].keys()
+    fieldnames = dicts[0].keys()
 
     csv_buffer = StringIO()
     csv_writer = csv.DictWriter(csv_buffer, fieldnames=fieldnames)
@@ -96,7 +96,7 @@ def convert_dict_to_csv(filename: str, dict: dict)-> tuple[str, str]:
     csv_writer.writeheader()
 
     # Write rows
-    for row_dict in dict:
+    for row_dict in dicts:
         csv_writer.writerow(row_dict)
 
     return (filename, csv_buffer.getvalue())

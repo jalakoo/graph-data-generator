@@ -1,6 +1,6 @@
 # tests/test_generate_utils.py
 import pytest
-from graph_data_generator.logic.generate_utils import property_contains_reference_generator, preprocess_nodes, preprocess_relationships, convert_dict_to_csv, reference_generator_names_only
+from graph_data_generator.logic.generate_utils import property_contains_reference_generator, preprocess_nodes, preprocess_relationships, convert_dicts_to_csv, reference_generator_names_only
 
 class TestReferenceGeneratorsOnly:
     # Currently only a single 'reference' reference generator available
@@ -144,17 +144,17 @@ class TestConvertDictToCSV:
         ]
 
     def test_convert_dict_to_csv_returns_tuple(self, sample_dict):
-        result = convert_dict_to_csv('test.csv', sample_dict)
+        result = convert_dicts_to_csv('test.csv', sample_dict)
         assert isinstance(result, tuple)
         assert len(result) == 2
 
     def test_convert_dict_to_csv_filename(self, sample_dict):
         filename = 'mydata.csv'
-        result = convert_dict_to_csv(filename, sample_dict)
+        result = convert_dicts_to_csv(filename, sample_dict)
         assert result[0] == filename
 
     def test_convert_dict_to_csv_contents(self, sample_dict):
-        result = convert_dict_to_csv('test.csv', sample_dict)
+        result = convert_dicts_to_csv('test.csv', sample_dict)
         contents = result[1]
         assert 'id,name' in contents
         assert '1,John Doe' in contents
@@ -163,4 +163,4 @@ class TestConvertDictToCSV:
 
     def test_convert_dict_to_csv_bad_data(self):
         with pytest.raises(Exception):
-            convert_dict_to_csv('test.csv', None)
+            convert_dicts_to_csv('test.csv', None)
