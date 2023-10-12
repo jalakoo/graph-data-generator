@@ -15,14 +15,14 @@ from graph_data_generator.logger import ModuleLogger
 VERSION = "0.3.0"
 
 
-def generate_to_neo4j(
-    json_source: str,
-    neo4j_uri: str,
-    neo4j_user: str,
-    neo4j_pass: str,
-    overwrite_db: bool = True
-):
-    raise Exception("Unimplemented")
+# def generate_to_neo4j(
+#     json_source: str,
+#     neo4j_uri: str,
+#     neo4j_user: str,
+#     neo4j_pass: str,
+#     overwrite_db: bool = True
+# ):
+#     raise Exception("Unimplemented")
 
     
 def generate_relationship_csvs(nodes_source: any):
@@ -35,7 +35,17 @@ def generate_nodes_csvs(nodes_source: any):
 def generate_csvs(
     json_source: str,
     enable_logging : bool = False
-):
+) -> list[(str, list[str])]:
+    """Generates a list of tuples containing (filename, csv string).
+
+    Args:
+        json_source: Source stringified JSON representation of a graph data model
+        enable_logging: Enables logging to console
+
+    Returns:
+        A list of tuples containing (filename, stringified csv) or None if an exception caught
+    """
+    
     if enable_logging is True:
         logger = ModuleLogger()
         logger.is_enabled = True
@@ -46,16 +56,34 @@ def generate_csvs(
         try:
             json_source = json.loads(json_source)
         except Exception as e:
-            raise Exception(f'json_source string not a valid JSON format: {e}')
+            if logger:
+                logger.error(f'Invalid source JSON: {e}: Check if json_source is a valid JSON string')
+            return None
         
+    # TODO: Generate csv of nodes
+    # TODO: Generate csv of relationships
+    # TODO: Composite and return entire list
     raise Exception("Unimplemented")
 
     
 def generate_zip(
     json_source: str,
     filename: str = "mock_data",
-    enable_logging : bool = False       
+    include_logs: bool = True,
+    enable_logging : bool = False,
 ):
+    
+    """Generates a zip file containing a series of .csv files and an optional .log file.
+
+    Args:
+        json_source: Source stringified JSON representation of a graph data model
+        filename: Optional filename for .zip file. Defaults to "mock_data.zip"
+        include_logs: Include logs in generated zip file. Defaults to True
+        enable_logging: Enables logging to console. Defaults to False
+
+    Returns:
+        A list of tuples containing (filename, stringified csv) or None if an exception caught
+    """
     csvs = generate_csvs(
         json_source,
         enable_logging)

@@ -9,8 +9,9 @@ class GeneratorType(Enum):
     STRING = 4,
     DATETIME = 5,
     ASSIGNMENT = 6,
-    RELATIONSHIP = 7,
-    FUNCTION = 8
+    # RELATIONSHIP = 7,
+    FUNCTION = 8,
+    REFERENCE = 9
 
     @staticmethod
     def type_from_string(aType: str):
@@ -29,8 +30,10 @@ class GeneratorType(Enum):
             return GeneratorType.BOOL
         elif type == "assignment":
             return GeneratorType.ASSIGNMENT
-        elif type == "relationship":
-            return GeneratorType.RELATIONSHIP
+        # elif type == "relationship":
+        #     return GeneratorType.RELATIONSHIP
+        elif type == "reference":
+            return GeneratorType.REFERENCE
         else:
             raise TypeError("Type not supported")
     
@@ -52,7 +55,8 @@ class GeneratorType(Enum):
             GeneratorType.DATETIME: "Datetime",
             GeneratorType.BOOL: "Bool",
             GeneratorType.ASSIGNMENT: "Assignment",
-            GeneratorType.RELATIONSHIP: "Relationship"
+            # GeneratorType.RELATIONSHIP: "Relationship"
+            GeneratorType.REFERENCE: "Reference"
         }
         result = type_map.get(self, None)
         if result is None:

@@ -6,8 +6,11 @@ from graph_data_generator.models.generator import generators_from_json
 # Regular generators
 from graph_data_generator.generators import bool, catch_phrase, city, company_name, country, date, email, exhaustive_random, first_name, float, float_from_list, float_range, int, int_from_list, int_range, last_name, lorem_paragraphs, loremtext_sentence, loremtext_words, md5, pure_random, string_from_csv, string_from_list, string_literal, technical_phrase, uri, uuid
 
-# Functional genertators
+# Functional generators
 from graph_data_generator.generators import add_floats, add_ints, add_strings
+
+# Reference generators
+from graph_data_generator.generators import reference
 
 # key name and generator name somewhat duplicitous currently. Keys will remain unchanged, but name add separately to support multi-lingu support (someday) 
 generators_json = {
@@ -454,6 +457,23 @@ generators_json = {
             "random"
         ],
         "type": "Assignment"
+    },
+    "reference": {
+        "args": [
+            {
+                "default": "",
+                "label": "Property key name to reference",
+                "type": "String"
+            },
+        ],
+        "code": reference,
+        "description": "Copies a value from another property by key name.",
+        "name": "Reference",
+        "tags": [
+            "reference",
+            "pointer",
+        ],
+        "type": "Reference"
     },
     "string": {
         "args": [

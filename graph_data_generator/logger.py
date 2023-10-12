@@ -54,6 +54,7 @@ class ModuleLogger(object):
         if self.is_enabled:
             return self.logger().critical(arg)
         pass
+
 class EmptyLogger:
 
     def notset(self, arg:str):

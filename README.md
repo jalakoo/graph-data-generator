@@ -96,6 +96,41 @@ The `generator_name` must be one of the existing unique generator names included
 
 The list value is the arguments list for the generator. The expected value types and number are dependent on the specified generator. The `generators/ALL_GENERATORS.py` file contains a `generators_json` file that list all the available generators, their type, and what arguments (if any) each expect.
 
+Types of Generators:
+| Type | Output Description |
+| ------ | ---------|
+| bool | True or False |
+| int | Integer number |
+| float | Float value |
+| string | String value |
+| datetime | A string representation of an ISO 8601 datetime object |
+| assignment | Used to determine how to exhaust a source list. ie relationships generation |
+| function | Combines output from multiple generators |
+| reference | Uses the value from another property |
+
+*Function Generators*
+Function generators allow combining output from multiple generators. Use other generator specifications in it's argument in the order they should be combined in.
+
+*Reference Generators*
+Reference Generators can be used to designate values from other properties or properties from other nodes and relationships should be used. Given a node with the following configuration:
+```
+{
+  id: 'n0',
+  caption: 'Person',
+  labels: [],
+  properties:{
+    first_name: {first_name:[]},
+    last_name: {last_name:[]},
+    email: {add_strings:[{reference:[first_name]}, ".", {reference:[last_name]},"\\@email.com"]}
+  }
+}
+```
+Would output node csv records like:
+```
+id, caption, first_name, last_name, email
+n0, Person, John, Wick, John.Wick@email.com
+```
+
 ***CONVENIENCE KEYWORDS***
 The following keyword values, regardless of casing, will map to pre-built generators as shorthands:
 | Value | Output Description  |
