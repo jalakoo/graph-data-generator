@@ -48,10 +48,9 @@ invalid_json_config = {
    "egg" :{}
 }
 
-def test_generate_bytes():
-   result = generate(valid_json_config)
-   assert isinstance(result, (bytes, bytearray))
-
 def test_generate_invalid_format():
    with pytest.raises(Exception):
        generate(invalid_json_config)
+
+
+# TODO: Add tests for new functions

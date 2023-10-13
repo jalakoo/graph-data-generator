@@ -17,6 +17,17 @@ def sample_node():
             }
     }
 
+@pytest.fixture
+def sample_node_missing_position():
+    return {
+        "id": "n1",
+        "caption": "Person",
+        "labels": [],
+            "properties": {
+                "name": '{"first_name":[]}'
+            }
+    }
+
 class TestPropertyMappings:
     def test_propertymappings_for_raw_properties(self, sample_node, sample_generators):
         mappings = generate_mapping.propertymappings_for_raw_properties(
@@ -35,6 +46,14 @@ class TestNodeMappings:
         assert len(nodes) == 1
         assert isinstance(list(nodes.values())[0], NodeMapping)
 
+    def test_node_mappings_from_invalid(self):
+        with pytest.raises(Exception):
+            nodes = generate_mapping.node_mappings_from("invalid", {})
+
+    def test_node_mappings_from_missing_position(self, sample_node_missing_position, sample_generators):
+        nodes = generate_mapping.node_mappings_from([sample_node_missing_position], sample_generators)
+        
+        assert len(nodes) == 0
 
 
 from graph_data_generator.logic.generate_mapping import relationshipmappings_from
@@ -98,25 +117,27 @@ class TestMappingFromJson:
             ],
             "relationships": []
         }
-        mapping, error = mapping_from_json(json_config, sample_generators)
+        mapping = mapping_from_json(json_config, sample_generators)
         assert mapping is not None
-        assert error is None
+        assert len(mapping.nodes) == 1, f'Expected 1 node, got {len(mapping.nodes)}'
+        assert len(mapping.relationships) == 0, f'Expected 0 relationship, got {len(mapping.relationships)}'
+
+        node = mapping.nodes['n1']
+        assert node.nid == 'n1', f'Expected node nid "n1" from: {node.nid}'
 
     def test_no_nodes(self, sample_generators):
         json_config = {
             "relationships": []
         }
-        mapping, error = mapping_from_json(json_config, sample_generators)
-        assert mapping is None
-        assert error is not None
+        with pytest.raises(Exception) as error:
+            mapping = mapping_from_json(json_config, sample_generators)
 
     def test_no_relationships(self, sample_generators):
         json_config = {
             "nodes": []
         }
-        mapping, error = mapping_from_json(json_config, sample_generators)
-        assert mapping is None
-        assert error is not None
+        mapping = mapping_from_json(json_config, sample_generators)
+        assert len(mapping.relationships.items()) == 0, f'Expected 0 relationships, got {len(mapping.relationships.items())}'
 
     def test_missing_position_key(self, sample_generators):
         json_config = {
@@ -136,9 +157,9 @@ class TestMappingFromJson:
             ],
             "relationships": []
         }
-        mapping, error = mapping_from_json(json_config, sample_generators)
-        assert mapping is not None
-        assert error is None
+        mapping = mapping_from_json(json_config, sample_generators)
+        assert len(mapping.nodes) == 0, f'Expected 0 node, got {len(mapping.nodes)}'
+        assert len(mapping.relationships) == 0, f'Expected 0 relationship, got {len(mapping.relationships)}'
 
     def test_missing_caption_key(self, sample_generators):
         json_config = {
@@ -161,12 +182,11 @@ class TestMappingFromJson:
             ],
             "relationships": []
         }
-        mapping, error = mapping_from_json(json_config, sample_generators)
-        assert mapping is not None
-        assert error is None
+        mapping = mapping_from_json(json_config, sample_generators)
+        assert len(mapping.nodes) == 0, f'Expected 0 node, got {len(mapping.nodes)}'
+        assert len(mapping.relationships) == 0, f'Expected 0 relationship, got {len(mapping.relationships)}'
 
     def test_invalid_json(self, sample_generators):
         json_config = "invalid_json"
-        mapping, error = mapping_from_json(json_config, sample_generators)
-        assert mapping is None
-        assert error is not None
+        with pytest.raises(Exception) as error:
+            mapping = mapping_from_json(json_config, sample_generators)

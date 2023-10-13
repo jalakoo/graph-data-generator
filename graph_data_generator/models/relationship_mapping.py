@@ -22,7 +22,8 @@ class RelationshipMapping():
             filter_generator = None,
             filter_args = [],
             assignment_generator = None,
-            assignment_args = []
+            assignment_args = [],
+            filename = None
         )
 
     def __init__(
@@ -42,7 +43,7 @@ class RelationshipMapping():
         # For filtering from nodes
         filter_generator: Generator = None,
         filter_args: list[any] = [],
-
+        filename: str = None
         ):
         self.rid = rid
         self.type = type
@@ -51,11 +52,12 @@ class RelationshipMapping():
         self.properties = properties
         self.count_generator = count_generator
         self.count_args = clean_list(count_args)
-        self.generated_values = None
+        self._generated_values = None
         self.filter_generator = filter_generator
         self.filter_generator_args = clean_list(filter_args)
         self.assignment_generator = assignment_generator
         self.assignment_args = clean_list(assignment_args)
+        self._filename = filename
 
     def __str__(self):
         return f"RelationshipMapping(rid={self.rid}, type={self.type}, from_node={self.from_node}, to_node={self.to_node}, properties={self.properties}, count_generator={self.count_generator}, count_args={self.count_args})"
@@ -76,6 +78,9 @@ class RelationshipMapping():
         }
 
     def filename(self):
+        if self._filename is not None:
+            return self._filename
+        # default
         from_node_name = self.from_node.caption.lower()
         to_node_name = self.to_node.caption.lower()
         return f"{from_node_name}_{self.type.lower()}_{to_node_name}_{self.rid.lower()}"
@@ -189,6 +194,10 @@ class RelationshipMapping():
                 all_results.append(result)
 
         # Store results for reference
-        self.generated_values = all_results
-        return self.generated_values
+        self._generated_values = all_results
+        return self._generated_values
         
+    def generated_values(self):
+        if self._generated_values is None:
+            self.generate_values()
+        return self._generated_values

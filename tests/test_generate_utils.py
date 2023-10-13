@@ -55,10 +55,22 @@ class TestPreprocessNodes:
         output = preprocess_nodes(input_data)
         assert output == expected, f'output: {output}'
 
-    def test_preprocess_drops_nodes_missing_labels(self):
+    def test_preprocess_drops_nodes_missing_caption(self):
         # All values from arrows json are automatically returned as strings
         # Including numbers here in case non-strings are otherwise introduced
-        input_data = [{'id': 1, 'caption':"test", "properties":{}}, {'id': 2, 'caption':'test', 'labels':[],'properties': {}}]
+        input_data = [{'id': 1, "properties":{}}, {'id': 2, 'caption':'test', 'labels':[],'properties': {}}]
+        expected = [{'id': 2, 'caption':'test', 'labels':[],'properties': {}}]
+        output = preprocess_nodes(input_data)
+        assert output == expected, f'output: {output}'
+
+    def test_preprocess_drops_nodes_missing_properties(self):
+        input_data = [{'id': 1, "caption":""}, {'id': 2, 'caption':'test', 'labels':[],'properties': {}}]
+        expected = [{'id': 2, 'caption':'test', 'labels':[],'properties': {}}]
+        output = preprocess_nodes(input_data)
+        assert output == expected, f'output: {output}'
+
+    def test_preprocess_drops_nodes_missing_id(self):
+        input_data = [{'caption': 1, "properties":{}}, {'id': 2, 'caption':'test', 'labels':[],'properties': {}}]
         expected = [{'id': 2, 'caption':'test', 'labels':[],'properties': {}}]
         output = preprocess_nodes(input_data)
         assert output == expected, f'output: {output}'

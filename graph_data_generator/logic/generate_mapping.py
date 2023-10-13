@@ -10,7 +10,6 @@ from graph_data_generator.models.generator import Generator, GeneratorType
 from graph_data_generator.logic.generate_values import generator_for_raw_property, assignment_generator_for
 from graph_data_generator.logger import ModuleLogger
 
-# TODO: Update to return object, error_msg tuple
 def propertymappings_for_raw_properties(
     raw_properties: dict[str, str], 
     generators: dict[str, Generator]
@@ -27,12 +26,11 @@ def propertymappings_for_raw_properties(
     }, 
     
     Parameters:
-    
-    raw_properties (dict): Raw property definitions from node or relationship
-    generators (dict): All available generator objects. [name : Generator] 
+        raw_properties (dict): Raw property definitions from node or relationship
+        generators (dict): All available generator objects. [name : Generator] 
 
     Returns:
-    dict: PropertyMapping objects keyed by property name 
+        dict: PropertyMapping objects keyed by property name 
     """
 
     property_mappings = {}
@@ -107,12 +105,11 @@ def node_mappings_from(
         }
 
         Parameters:
-
-        node_dicts (list): List of node data dicts from Arrows JSON 
-        generators (dict): Available generator objects
+            node_dicts (list): List of node data dicts from Arrows JSON 
+            generators (dict): Available generator objects
 
         Returns:
-        dict: NodeMapping objects keyed by node id
+            dict: NodeMapping objects keyed by node id
     """
 
     # Prepare a dict to store mappings.
@@ -227,16 +224,23 @@ def relationshipmappings_from(
     Performs validation on required fields.
 
     Parameters:
-
-    relationship_dicts (list): List of relationship data dicts from Arrows JSON
-    nodes (dict): NodeMapping objects 
-    generators (dict): Available generator objects
+        relationship_dicts (list): List of relationship data dicts from Arrows JSON
+        nodes (dict): NodeMapping objects 
+        generators (dict): Available generator objects
 
     Returns: 
-    dict: RelationshipMapping objects keyed by relationship id
+        A dictionary of { relationship id : list[RelationshipMapping objects]}
     """
 
     relationshipmappings = {}
+    if relationship_dicts is None:
+        ModuleLogger().debug(f'No relationship data to process')
+        relationship_dicts = []
+
+    if isinstance(relationship_dicts, list) is False:
+        ModuleLogger().debug(f'Expected relationship_dicts to be a list of dictionaries, got {relationship_dicts}')
+        relationship_dicts = []
+
     for relationship_dict in relationship_dicts:
         # Check for required data in raw node dict from arrows.app json
 
@@ -315,34 +319,27 @@ def relationshipmappings_from(
 
 def mapping_from_json(
     json_config: dict,
-    generators: dict[str, Generator]) -> tuple[Mapping, str]:
+    generators: dict[str, Generator]) -> Mapping:
     """
     Generates a Mapping object.
 
     Parameters:
-
-    json_config (dict) : An ARROWs compatible JSON import/export file
-    generators (dict[str, Generator]) : Dict of unique generator names to available generators
+        json_config (dict) : An ARROWs compatible JSON import/export file
+        generators (dict[str, Generator]) : Dict of unique generator names to available generators
 
     Returns:
-    tuple: 
-        - Mapping : Populated Mapping object, None if error encountered
-        - str: Error message if failed, otherwise None.
-    
+        Mapping object : Populated Mapping object
     """
     if isinstance(json_config, dict) is False:
-        return None, f"JSON object is not a dict: {json_config}"
+        raise Exception(f"JSON object is not a dict: {json_config}")
 
     # Extract and process nodes
     node_dicts = json_config.get("nodes", None)
     if node_dicts is None:
-        return None, f" No nodes found in JSON file: {json}"
+        raise Exception(f" No nodes found in JSON file: {json}")
     relationship_dicts = json_config.get("relationships", None)
     if relationship_dicts is None:
-        return None, f"No relationships found in JSON file: {json}"
-
-    # TODO:
-    # Purge orphaned nodes
+        ModuleLogger().info(f"No relationships found in JSON file: {json}")
 
     # Convert source information to mapping objects
     nodes = node_mappings_from(node_dicts, generators)
@@ -353,4 +350,5 @@ def mapping_from_json(
         nodes=nodes,
         relationships=relationships
     )
-    return mapping, None
+
+    return mapping

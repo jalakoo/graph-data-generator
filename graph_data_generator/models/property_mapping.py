@@ -24,19 +24,17 @@ class PropertyMapping(BaseMapping):
         self.name = name
         self.generator = generator
         self.args = args
+        self._generated_values = None
 
     def __str__(self):
         name = self.name if self.name is not None else "<unnamed>"
         generator = self.generator if self.generator is not None else "<no_generator_assigned>"
         return f"PropertyMapping(pid={self.pid}, name={name}, generator={generator}, args={self.args}"
         
-    # def __repr__(self):
-    #     return self.__str__()
+    def filename(self) -> str:
+        return self.name
 
-    # def __equ__(self, other):
-    #     return self.pid == other.pid
-
-    def to_dict(self):
+    def to_dict(self) -> dict:
         return {
             "pid": self.pid,
             "name": self.name,
@@ -55,8 +53,12 @@ class PropertyMapping(BaseMapping):
         
         # Generator needed to be assigned before this call
         if self.generator == None:
-            raise Exception(f'Property Mapping named {self.name} is missing a generator property.')
+            raise Exception(f'Property Mapping named "{self.name}" is missing a generator property')
 
         result = self.generator.generate(self.args)
-        return [result]
+        self._generated_values = [result]
+        return self._generated_values
+    
+    def generated_values(self) -> list[dict]:
+        return self._generated_values
 

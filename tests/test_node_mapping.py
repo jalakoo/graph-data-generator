@@ -19,7 +19,6 @@ class TestNodeMapping:
         assert mapping.count_args == []
         assert mapping.default_count == 1
         assert mapping.key_property is None
-        assert mapping.generated_values is None
 
     # Tests that a NodeMapping object with all parameters is created successfully
     def test_node_mapping_object_with_all_parameters_created_successfully(self):
@@ -48,7 +47,6 @@ class TestNodeMapping:
         assert mapping.count_args == count_args
         assert mapping.default_count == 1
         assert mapping.key_property == key_property
-        assert mapping.generated_values is None
 
     # Tests that a NodeMapping object with default values is created successfully
     def test_node_mapping_object_with_default_values_created_successfully(self):
@@ -62,7 +60,6 @@ class TestNodeMapping:
         assert mapping.count_args == []
         assert mapping.default_count == 1
         assert mapping.key_property is None
-        assert mapping.generated_values is None
 
     # Tests that the generate_values() method generates values correctly with a count generator
     def test_generate_values_method_with_count_generator(self):
@@ -82,7 +79,6 @@ class TestNodeMapping:
             count_args=count_args,
             key_property=key_property
         )
-        assert mapping.generated_values is None
         # TODO: generate values and test
 
 
@@ -105,7 +101,6 @@ class TestNodeMapping:
             key_property=key_property
         )
   
-        assert mapping.generated_values is None
         # TODO: Generate values and check actual output
 
 
