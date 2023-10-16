@@ -1,4 +1,5 @@
 from enum import Enum, unique
+import datetime
 
 @unique
 class GeneratorType(Enum):
@@ -37,6 +38,22 @@ class GeneratorType(Enum):
         else:
             raise TypeError("Type not supported")
     
+    @staticmethod
+    def type_from_value(value: any):
+        if isinstance(value, str):
+            return GeneratorType.STRING
+        elif isinstance(value, int):
+            return GeneratorType.INT
+        elif isinstance(value, float):
+            return GeneratorType.FLOAT
+        elif isinstance(value, bool):
+            return GeneratorType.BOOL
+        elif isinstance(value, datetime.datetime):
+            return GeneratorType.DATETIME
+        else:
+            # Can't infer FUNCTION or REFERENCE types from value alone
+            return GeneratorType.UNKNOWN
+
     def to_string(self) -> str:
         """
         Convert a GeneratorType enum value to its corresponding string representation.
@@ -60,5 +77,5 @@ class GeneratorType(Enum):
         }
         result = type_map.get(self, None)
         if result is None:
-            raise TypeError(f"{self} type not supported")
+            return "Unknown"
         return result
