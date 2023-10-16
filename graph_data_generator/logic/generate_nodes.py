@@ -21,6 +21,8 @@ def generate_a_node_record(input: dict) -> dict:
     # Insert a uuid so user does not need to assign a key
     properties["_uid"] = "{\"uuid\":[]}"
 
+    # TODO: Sort properties so reference generators are last
+
     # Generate values for all properties
     for property_id, property in properties.items():
         # Skip the special COUNT identifier

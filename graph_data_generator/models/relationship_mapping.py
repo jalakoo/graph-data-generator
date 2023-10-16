@@ -155,13 +155,18 @@ class RelationshipMapping(BaseMapping):
                 # Select a random target node
 
                 if values is None or len(values) == 0:
-                    # Reset
-                    values = original_values
+                    # No values to run
+                    continue
 
                 # Extract results. Values will be passed back through the next iteration in case the generator returns a modified list
 
                 # TODO: values does not change after this call
                 to_node_value_dict, new_values = self.assignment_generator.generate(values)
+                
+                # Error handling
+                if to_node_value_dict is None:
+                    ModuleLogger().error(f'Unexpected value returned from assignment generator: {self.assignment_generator} for relationship: {self}')
+                    continue
 
                 values = new_values
 
@@ -182,7 +187,10 @@ class RelationshipMapping(BaseMapping):
                     f'_to_{to_node_key_property_name}': to_node_key_property_value
                 }
 
-                # Generate the properties
+
+                # TODO: Sort properties so reference generators are last
+
+                # Generate relationships properties
                 for property_name, property_mapping in self.properties.items():
                     result[property_name] = property_mapping.generate_values()[0]
 

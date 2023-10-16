@@ -19,6 +19,8 @@ def generate_relationship_properties(properties:dict) -> dict:
 
     # Insert a uuid so user does not need to assign a key
     properties["_uid"] = "{\"uuid\":[]}"
+    
+    # TODO: Sort properties so reference generators are last
 
     # Generate values for all properties
     output = {}

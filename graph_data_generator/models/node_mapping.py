@@ -119,6 +119,9 @@ class NodeMapping(BaseMapping):
 
         for _ in range(count):
             node_result = {}
+
+            # TODO: Sort properties so reference generators are last
+
             for property_id, property in self.properties.items():
                 # Pass literal values
                 if isinstance(property, PropertyMapping) == False:

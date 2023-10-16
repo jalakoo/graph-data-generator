@@ -33,16 +33,16 @@ def stop_logging():
     ModuleLogger().info(f'Discontinuing logging')
     ModuleLogger().is_enabled = False
 
-def generate_data_importer_only(input: str|dict) -> str:
-    """Generates a .json file for use by Data Importer w/ no accompanying .csv data.
+# def generate_data_importer_only(input: str|dict) -> str:
+#     """Generates a .json file for use by Data Importer w/ no accompanying .csv data.
 
-    Args:
-        input: Stringified JSON object or dictionary of configuration information
+#     Args:
+#         input: Stringified JSON object or dictionary of configuration information
 
-    Returns:
-        A stringified .json file
-    """
-    raise Exception('unimplemented')
+#     Returns:
+#         A stringified .json file
+#     """
+#     raise Exception('unimplemented')
 
 def generate_dicts_only(input: str|dict) -> dict:
     """Generates a dictionary of nodes and relationships records. Uses a non-mapping process to directly generate mock data.
@@ -171,11 +171,11 @@ def generate(
         raise e
 
     # Add data import json with csvs for zip file
-    contents = csvs["neo4j_importer_model.json"] = json
+    csvs["neo4j_importer_model.json"] = json
 
     try:
         # Package into zip file
-        bytes = generate_zip(contents)
+        bytes = generate_zip(csvs)
         ModuleLogger().info(f'Generated zip file')
     except Exception as e:
         ModuleLogger().error(f'Error generating zip file: {e}')

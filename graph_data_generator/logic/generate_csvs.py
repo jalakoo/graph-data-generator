@@ -51,10 +51,12 @@ def generate_csvs(mapping: Mapping) -> dict[str, str]:
 
     for nodeMapping in mapping.nodes.values():
         values = generate_csv(nodeMapping)
-        output[nodeMapping.filename()] = values
+        filename = f'{nodeMapping.filename()}.csv'
+        output[filename] = values
     
     for relMapping in mapping.relationships.values():
         values = generate_csv(relMapping)
-        output[relMapping.filename()] = values
+        filename = f'{relMapping.filename()}.csv'
+        output[filename] = values
 
     return output

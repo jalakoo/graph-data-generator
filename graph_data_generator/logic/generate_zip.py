@@ -5,13 +5,17 @@ from graph_data_generator.logger import ModuleLogger
 def generate_zip(
         contents: dict,
         )->io.BytesIO:
+    
+    if isinstance(contents, dict) == False:
+        raise Exception(f"Contents must be a dictionary. Instead got {contents}")
+
     # Prep zip file to write data to
     in_memory_data = io.BytesIO()
     in_memory_zip = zipfile.ZipFile(
         in_memory_data, "w", zipfile.ZIP_DEFLATED, False)
     in_memory_zip.debug = 3 
 
-    for filename, value in contents:
+    for filename, value in contents.items():
         ModuleLogger().debug(f'Adding {filename} to zip file')
         in_memory_zip.writestr(filename, value)
 
