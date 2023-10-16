@@ -48,7 +48,7 @@ def sample_node_mapping(sample_count_generator, sample_property_mapping):
     )
 
 @pytest.fixture()
-def sample_relationship_mapping(sample_count_generator, sample_property_mapping, sample_assignment_generator):
+def sample_relationship_mapping(sample_count_generator, sample_property_mapping, sample_node_mapping, sample_assignment_generator):
     return RelationshipMapping(
         rid = "mockRelationship",
         type = "MOCK",
@@ -68,8 +68,13 @@ def sample_relationship_mapping(sample_count_generator, sample_property_mapping,
 #     )
 
 class TestGenerateCSVs():
-    def test_generate_csv_valid(self, sample_node_mapping):
+    def test_generate_csv_valid_node(self, sample_node_mapping):
         csv = generate_csv(sample_node_mapping)
+        assert isinstance(csv, str)
+        assert csv != ""
+
+    def test_generate_csv_valid_relationship(self, sample_relationship_mapping):
+        csv = generate_csv(sample_relationship_mapping)
         assert isinstance(csv, str)
         assert csv != ""
 

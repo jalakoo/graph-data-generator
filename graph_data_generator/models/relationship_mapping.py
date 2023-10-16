@@ -6,8 +6,9 @@ from graph_data_generator.logger import ModuleLogger
 import sys
 from copy import deepcopy
 from graph_data_generator.utils.list_utils import clean_list
+from graph_data_generator.models.base_mapping import BaseMapping
 
-class RelationshipMapping():
+class RelationshipMapping(BaseMapping):
 
     @staticmethod
     def empty():
@@ -102,13 +103,6 @@ class RelationshipMapping():
         self,
         )-> list[dict]:
 
-
-        # Make sure from and to nodes have generated values already
-        if self.from_node.generated_values == None:
-            self.from_node.generate_values()
-        if self.to_node.generated_values == None:
-            self.to_node.generate_values()
-
         # Sample return list:
         # [
         #  {
@@ -125,18 +119,20 @@ class RelationshipMapping():
         # TODO: Run filter generator here to determine which source nodes to process
 
         # Make a copy of the generated list
-        values = deepcopy(self.to_node.generated_values)
-        original_values = deepcopy(self.to_node.generated_values)
+        print(f'to_node: {self.to_node}')
+    
+        values = self.to_node.generated_values()[:]
+        original_values = self.to_node.generated_values()[:]
 
         # Iterate through every generated source node
-        for value_dict in self.from_node.generated_values:
+        for value_dict in self.from_node.generated_values():
             # dict of property names and generated values
 
             # Decide on how many of these relationships to generate
             count = 0
             try:
                 count = self.count_generator.generate(self.count_args)
-                ModuleLogger.debug(f'{self.from_node.caption} node: {self.type} relationship count: {count}')
+                ModuleLogger().debug(f'{self.from_node.caption} node: {self.type} relationship count: {count}')
             except:
                 # Generator not found or other code error
                 raise Exception(f"Relationship mapping could not generate a number of relationships to continue generation process, error: {str(sys.exc_info()[0])}")

@@ -8,6 +8,7 @@ from graph_data_generator.logic.generate_csvs import generate_csvs
 from graph_data_generator.logic.generate_mapping import mapping_from_json
 from graph_data_generator.logic.generate_nodes import generate_nodes
 from graph_data_generator.logic.generate_relationships import generate_relationships
+from graph_data_generator.logic.generate_data_import import generate_data_import_json
 from graph_data_generator.logic.generate_utils import convert_dicts_to_csv
 from graph_data_generator.models.mapping import Mapping
 
@@ -85,7 +86,7 @@ def generate_dicts_only(input: str|dict) -> dict:
     return output
 
 def generate_csvs_only(input: str | dict) -> list[(str, list[str])]:
-    """Generates a list of tuples containing (filename, csv string).
+    """Generates a list of tuples containing (filename, csv string). Uses a non-mapping process to directly generate mock data.
 
     Args:
         json_source: Source stringified JSON representation of a graph data model
@@ -115,37 +116,6 @@ def generate_csvs_only(input: str | dict) -> list[(str, list[str])]:
         output.append(convert_dicts_to_csv(f'{type}_{rid}.csv', rels))
 
     return output
-
-    
-# def generate_zip_only(
-#     input: str | dict,
-#     filename: str = "mock_data"
-# ) -> io.BytesIO:
-    
-#     """Generates a zip file containing a series of .csv files and an optional .log file.
-
-#     Args:
-#         input: Source stringified JSON representation of a graph data model
-#         filename: Optional filename for .zip file. Defaults to "mock_data.zip"
-
-#     Returns:
-#         A zip file of .csvs and a .json data-importer compatible file
-#     """
-    
-#     in_memory_data = io.BytesIO()
-#     in_memory_zip = zipfile.ZipFile(
-#         in_memory_data, "w", zipfile.ZIP_DEFLATED, False)
-#     in_memory_zip.debug = 3 
-
-#     csvs = generate_csvs_only(input)
-#     ModuleLogger().debug(f'csvs files generated: {len(csvs)}')
-
-#     for filename, records in csvs:
-#         in_memory_zip.writestr(filename, records)
-
-#     # TODO: Add in data-importer .json file
-
-#     return in_memory_data
 
 def generate_mapping(input: str|dict)-> Mapping:
 
@@ -181,19 +151,37 @@ def generate(
     if enable_logging:
         start_logging()
 
+    # Convert config to a mapping file
     mapping = generate_mapping(json_source)
 
-    csvs = generate_csvs(mapping) 
+    # Generate data
+    try:
+        csvs = generate_csvs(mapping)
+        ModuleLogger().info(f'Generated {len(csvs)} csv files')
+    except Exception as e:
+        ModuleLogger().error(f'Error generating csvs: {e}')
+        raise e
 
-    # Generate output and return as bytes of a zip file
-    bytes, error_msg = generate_zip(
-        mapping
-    )
-    if bytes is None:
-        raise Exception(error_msg)
-    if error_msg is not None:
-        ModuleLogger().error(error_msg)
+    # Generate data import json
+    try:
+        json = generate_data_import_json(mapping)
+        ModuleLogger().info(f'Generated data import json')
+    except Exception as e:
+        ModuleLogger().error(f'Error generating data import json: {e}')
+        raise e
 
+    # Add data import json with csvs for zip file
+    contents = csvs["neo4j_importer_model.json"] = json
+
+    try:
+        # Package into zip file
+        bytes = generate_zip(contents)
+        ModuleLogger().info(f'Generated zip file')
+    except Exception as e:
+        ModuleLogger().error(f'Error generating zip file: {e}')
+        raise e
+
+    # Return based on file output type
     if output_format == 'string':
         data_bytes = bytes.getvalue()
         result = data_bytes.decode('utf-8')
