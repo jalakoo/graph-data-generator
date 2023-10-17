@@ -1,4 +1,5 @@
 
+from graph_data_generator.models.base_mapping import BaseMapping
 from graph_data_generator.models.node_mapping import NodeMapping
 from graph_data_generator.models.relationship_mapping import RelationshipMapping
 from graph_data_generator.logger import ModuleLogger
@@ -7,7 +8,7 @@ import sys
 
 
 class Mapping():
-    # For storing mapping configurations
+    # For storing all mapping data
 
     @staticmethod
     def empty():
@@ -61,6 +62,18 @@ class Mapping():
         
     def did_generate_values(self):
         return self._generated_values
+    
+    def _request_nodes(self, node_caption: str) -> list[NodeMapping]:
+        return [node for node in self.nodes.values() if node.caption == node_caption]
+    
+    def _request_relationships(self, relationship_type: str) -> list[RelationshipMapping]:
+        return [rel for rel in self.relationships.values() if rel.type == relationship_type]
+
+    def _request_elements(self, name: str) -> list[BaseMapping]:
+        # Returns all nodes and relationship mapping objects with caption or type name
+        nodes = self._request_nodes(name)
+        relationships = self._request_relationships(name)
+        return nodes + relationships
     
     def generate_values(self):
         for nodeMappings in self.nodes.values():

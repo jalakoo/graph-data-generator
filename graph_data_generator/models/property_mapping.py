@@ -49,7 +49,7 @@ class PropertyMapping(BaseMapping):
             return False
         return True
     
-    def generate_values(self) -> list[dict]:
+    def generate_values(self, data_callback: callable[list[any]]) -> list[dict]:
         
         # Generator needed to be assigned before this call
         if self.generator == None:

@@ -29,7 +29,7 @@ def actual_generator_for_raw_property(
         generator_id = key
         generator = generators.get(generator_id, None)
 
-        # Check special function generators
+        # Check special generator types
         if generator is not None and generator.type == GeneratorType.FUNCTION:
             # Extract the generators from the args and pass tuples of (Generator, Args) as higher level args 
             ModuleLogger().debug(f'Function generator {generator.name} detected. Arg value: {value}')
@@ -41,6 +41,10 @@ def actual_generator_for_raw_property(
                 new_value.append((gen, args))
             value = new_value
             
+        if generator is not None and generator.type == GeneratorType.REFERENCE:
+            #  Reference generators need data from other nodes or relationships
+            raise Exception(f'Reference generator processing unimplemented')
+
         if generator is None:
             ModuleLogger().warning(f'Generator_id "{generator_id}" not found in generators.')
             return (None, None)

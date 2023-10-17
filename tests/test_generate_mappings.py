@@ -1,5 +1,5 @@
 import pytest
-from graph_data_generator.logic import generate_mapping
+from graph_data_generator.logic import generate_mappings
 from graph_data_generator.models.node_mapping import NodeMapping
 
 @pytest.fixture
@@ -30,7 +30,7 @@ def sample_node_missing_position():
 
 class TestPropertyMappings:
     def test_propertymappings_for_raw_properties(self, sample_node, sample_generators):
-        mappings = generate_mapping.propertymappings_for_raw_properties(
+        mappings = generate_mappings.propertymappings_for_raw_properties(
             sample_node["properties"], 
             sample_generators
         )
@@ -41,22 +41,22 @@ class TestPropertyMappings:
 
 class TestNodeMappings:
     def test_nodemappings_from(self, sample_node, sample_generators):
-        nodes = generate_mapping.node_mappings_from([sample_node], sample_generators)
+        nodes = generate_mappings.node_mappings_from([sample_node], sample_generators)
 
         assert len(nodes) == 1
         assert isinstance(list(nodes.values())[0], NodeMapping)
 
     def test_node_mappings_from_invalid(self):
         with pytest.raises(Exception):
-            nodes = generate_mapping.node_mappings_from("invalid", {})
+            nodes = generate_mappings.node_mappings_from("invalid", {})
 
     def test_node_mappings_from_missing_position(self, sample_node_missing_position, sample_generators):
-        nodes = generate_mapping.node_mappings_from([sample_node_missing_position], sample_generators)
+        nodes = generate_mappings.node_mappings_from([sample_node_missing_position], sample_generators)
         
         assert len(nodes) == 0
 
 
-from graph_data_generator.logic.generate_mapping import relationshipmappings_from
+from graph_data_generator.logic.generate_mappings import relationshipmappings_from
 
 class TestRelationshipMappings:
     # Tests that valid input with all required fields is processed correctly
@@ -92,7 +92,7 @@ class TestRelationshipMappings:
         assert result["r0"].assignment_args == []
 
 
-from graph_data_generator.logic.generate_mapping import mapping_from_json
+from graph_data_generator.logic.generate_mappings import mapping_from_json
 
 class TestMappingFromJson:
     def test_happy_path(self, sample_generators):

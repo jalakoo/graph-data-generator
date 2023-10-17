@@ -101,6 +101,7 @@ class RelationshipMapping(BaseMapping):
 
     def generate_values(
         self,
+        data_callback: callable[list[any]]
         )-> list[dict]:
 
         # Sample return list:
@@ -192,7 +193,7 @@ class RelationshipMapping(BaseMapping):
 
                 # Generate relationships properties
                 for property_name, property_mapping in self.properties.items():
-                    result[property_name] = property_mapping.generate_values()[0]
+                    result[property_name] = property_mapping.generate_values(data_callback)[0]
 
                 # Add the relationship to the list
                 all_results.append(result)

@@ -5,7 +5,7 @@ import zipfile
 
 from graph_data_generator.logic.generate_zip import generate_zip
 from graph_data_generator.logic.generate_csvs import generate_csvs
-from graph_data_generator.logic.generate_mapping import mapping_from_json
+from graph_data_generator.logic.generate_mappings import mapping_from_json
 from graph_data_generator.logic.generate_nodes import generate_nodes
 from graph_data_generator.logic.generate_relationships import generate_relationships
 from graph_data_generator.logic.generate_data_import import generate_data_import_json

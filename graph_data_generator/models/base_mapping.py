@@ -22,7 +22,7 @@ class BaseMapping(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def generate_values(self) -> list[dict]:
+    def generate_values(self, data_callback: callable[list[any]]) -> list[dict]:
         pass
 
     @abc.abstractmethod
