@@ -468,7 +468,7 @@ generators_json = {
             },
         ],
         "code": reference,
-        "description": "Copies a value from another property by key name.",
+        "description": "Copies a value from another property by the property key name.",
         "name": "Reference",
         "tags": [
             "reference",

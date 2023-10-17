@@ -1,4 +1,4 @@
-# New stateless process for creating Node data
+# New objectless process for creating Node data
 
 from graph_data_generator.logic.generate_utils import preprocess_nodes
 from graph_data_generator.logic.generate_count import count_generator_from
@@ -6,11 +6,15 @@ from graph_data_generator.logic.generate_values import generator_for_raw_propert
 from graph_data_generator.generators.ALL_GENERATORS import generators
 from graph_data_generator.logger import ModuleLogger
 
-def generate_a_node_record(input: dict) -> dict:
+def generate_a_node_record(
+        input: dict, 
+        data_callback: callable[[str],any] = None
+        ) -> dict:
     """Generates a single node record.
 
     Args:
         input: List of dictionaries defining node specifications
+        data_callback: Optional callback function for retrieving data from external sources
 
     Returns:
         A dictionary with generated nodes records. Original node config ids as keys. Values are lists of dictionaries
@@ -28,15 +32,22 @@ def generate_a_node_record(input: dict) -> dict:
         # Skip the special COUNT identifier
         if property_id.lower() == "count":
             continue
-        generator, args = generator_for_raw_property(property, generators)
+        generator, args = generator_for_raw_property(
+            property, 
+            generators, 
+            data_callback)
         output[property_id] = generator.generate(args)
     return output
 
-def generate_node_records(input: dict) -> list[dict]:
+def generate_node_records(
+        input: dict,
+        data_callback: callable[[str], any] = None 
+        ) -> list[dict]:
     """Generates a list of node records}.
 
     Args:
         input: Dictionaries defining node specification
+        data_callback: Optional callback function for retrieving data from external sources
 
     Returns:
         A list of dictionaries of generated nodes records.
@@ -57,7 +68,7 @@ def generate_node_records(input: dict) -> list[dict]:
 
     for _ in range(count):
         # Generate a single node record
-        node = generate_a_node_record(input)
+        node = generate_a_node_record(input, data_callback)
 
         node["_labels"] = labels
 
@@ -98,6 +109,9 @@ def generate_nodes(input: list[dict]) -> dict:
     # Using a dict as we generate nodes
     # node ids will be the keys, values will be a list of dictionaries representing individually created records
     output = {}
+
+    # def callback(id: str) -> any:
+    #     nonlocal cleaned_sorted_input
 
     # Run through each node type, generating nodes and properties for each based on the input configuration
     for node_spec in cleaned_sorted_input:
