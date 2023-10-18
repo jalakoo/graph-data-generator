@@ -101,7 +101,7 @@ class RelationshipMapping(BaseMapping):
 
     def generate_values(
         self,
-        data_callback: callable[list[any]]
+        data_callback: callable[[str],any]
         )-> list[dict]:
 
         # Sample return list:
@@ -202,7 +202,7 @@ class RelationshipMapping(BaseMapping):
         self._generated_values = all_results
         return self._generated_values
         
-    def generated_values(self):
+    def generated_values(self, data_callback: callable[[str],any]):
         if self._generated_values is None:
             self.generate_values()
         return self._generated_values

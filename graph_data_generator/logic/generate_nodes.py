@@ -1,4 +1,4 @@
-# New objectless process for creating Node data
+# Objectless process for creating Node data
 
 from graph_data_generator.logic.generate_utils import preprocess_nodes
 from graph_data_generator.logic.generate_count import count_generator_from

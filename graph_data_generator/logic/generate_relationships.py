@@ -1,3 +1,5 @@
+# Objectless relationship generation
+
 from graph_data_generator.logic.generate_utils import preprocess_relationships
 from graph_data_generator.logic.generate_count import count_generator_from
 from graph_data_generator.logic.generate_assignment import assignment_generator_from

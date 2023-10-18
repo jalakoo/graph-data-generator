@@ -86,7 +86,7 @@ class NodeMapping(BaseMapping):
             return False
         return True
 
-    def generate_values(self, data_callback: callable[list[any]]) -> list[dict]:
+    def generate_values(self, data_callback: callable[[str],any]) -> list[dict]:
         # returns a list of dicts with the generated values
         # Example return:
         # [
@@ -151,7 +151,7 @@ class NodeMapping(BaseMapping):
 
         return self._generated_values
     
-    def generated_values(self) -> list[dict]:
+    def generated_values(self, data_callback: callable[[str],any]) -> list[dict]:
         if self._generated_values is None:
             self.generate_values()
         return self._generated_values

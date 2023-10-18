@@ -8,7 +8,7 @@ import sys
 
 
 class Mapping():
-    # For storing all mapping data
+    # For storing all mapping data. Stores lists of NodeMapping and RelationshipMapping objects.
 
     @staticmethod
     def empty():
