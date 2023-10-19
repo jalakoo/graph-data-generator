@@ -4,12 +4,10 @@ import json
 import zipfile
 
 from graph_data_generator.logic.generate_zip import generate_zip
-from graph_data_generator.logic.generate_csvs import generate_csvs
+from graph_data_generator.logic.generate_csvs import generate_csvs, generate_csvs_from_dictionaries
+from graph_data_generator.logic.generate_dictionaries import generate_dictionaries
 from graph_data_generator.logic.generate_mappings import mapping_from_json
-from graph_data_generator.logic.generate_nodes import generate_nodes
-from graph_data_generator.logic.generate_relationships import generate_relationships
 from graph_data_generator.logic.generate_data_import import generate_data_import_json
-from graph_data_generator.logic.generate_utils import convert_dicts_to_csv
 from graph_data_generator.models.mapping import Mapping
 
 # Here also to expose for external use
@@ -33,80 +31,6 @@ def stop_logging():
     ModuleLogger().info(f'Discontinuing logging')
     ModuleLogger().is_enabled = False
 
-
-# def generate_dicts_only(input: str|dict) -> dict:
-#     """Generates a dictionary of nodes and relationships records. Uses a non-mapping process to directly generate mock data.
-
-#     Args:
-#         input: Stringified JSON object or dictionary of configuration information
-
-#     Returns:
-#         A dictionary with generated nodes and relationship records
-#     """
-    
-#     # Convert json string to dict
-#     if isinstance(input, str):
-#         try:
-#             input = json.loads(input)
-#         except Exception as e:
-#             message = f'{e}. Checking validity of input configuration file'
-#             raise Exception(message)
-        
-#     # Confirm we have a dict
-#     if isinstance(input, dict) == False:
-#         message = f'Expecting a string or dictionary as an input file. Instead got {input}'
-#         raise Exception(message)
-
-#     # Check dict has minimum data
-#     nodes = input.get('nodes', None)
-#     if nodes is None:
-#         message = f'"nodes" key required from input file: {input}'
-#         raise Exception(message)
-    
-#     # Generate node records
-#     node_dicts = generate_nodes(nodes)
-#     output = {'nodes': node_dicts}
-
-#     # Optionally generate relationship records
-#     rels = input.get('relationships', None)
-#     if rels is not None:
-#         rel_dicts = generate_relationships(rels, node_dicts)
-#         output['relationships'] = rel_dicts
-    
-#     return output
-
-# def generate_csvs_only(input: str | dict) -> list[(str, list[str])]:
-#     """Generates a list of tuples containing (filename, csv string). Uses a non-mapping process to directly generate mock data.
-
-#     Args:
-#         json_source: Source stringified JSON representation of a graph data model
-
-#     Returns:
-#         A list of tuples containing (filename, stringified csv)
-#     """
-    
-#     # Generate dictionary of records first
-#     all_records = generate_dicts_only(input)
-#     all_nodes = all_records.get('nodes', None)
-#     all_relationships = all_records.get('relationships', None)
-            
-#     if all_nodes is None:
-#         raise Exception(f'No nodes generated for input: {input}')
-
-#     ModuleLogger().debug(f'records generated for nodes: {all_nodes.keys()}')
-#     ModuleLogger().debug(f'records generated for relationships: {all_relationships.keys()}')
-
-#     output = []
-#     for nid, nodes in all_nodes.items():
-#         caption = nodes[0]['_labels'][0]
-#         output.append(convert_dicts_to_csv(f'{caption}_{nid}.csv', nodes))
-
-#     for rid, rels in all_relationships.items():
-#         type = rels[0]['_type']
-#         output.append(convert_dicts_to_csv(f'{type}_{rid}.csv', rels))
-
-#     return output
-
 def generate_mapping(input: str|dict)-> Mapping:
 
     # If json_object is a string, load and convert into a dict object
@@ -121,21 +45,6 @@ def generate_mapping(input: str|dict)-> Mapping:
         input, 
         generators
     )
-
-def generate_dictionaries(mapping: Mapping) -> dict:
-    """Generates a dictionary of nodes and relationships records. Uses a mapping process to generate mock data.
-
-    Args:
-        input (any): A stringified JSON or dict object containing the mapping of nodes and relationships to generate.
-    
-    Returns:
-        A dictionary with 'nodes' and 'relationships' keys containing lists of dictionaries of generated records.
-    """
-    if isinstance(mapping, Mapping) == False:
-        raise Exception(f'Expecting a Mapping object as an input. Instead got {mapping}. If using a string or dictionary, be sure to run generate_mapping() first.')
-    
-    
-
 
 def generate(
     json_source : str | dict,
@@ -160,6 +69,16 @@ def generate(
     mapping = generate_mapping(json_source)
 
     # Generate data
+    try:
+        dicts = generate_dictionaries(mapping)
+        nodes = len(dicts["nodes"])
+        rels = len(dicts["relationships"])
+        ModuleLogger().info(f'Generated {nodes} nodes and {rels} records')
+    except Exception as e:
+        ModuleLogger().error(f'Error generating data as dictionaries: {e}')
+        raise e
+
+    # Generate csv files from generated data
     try:
         csvs = generate_csvs(mapping)
         ModuleLogger().info(f'Generated {len(csvs)} csv files')

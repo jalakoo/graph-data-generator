@@ -86,7 +86,7 @@ class NodeMapping(BaseMapping):
             return False
         return True
 
-    def generate_values(self, data_callback: callable[[str],any]) -> list[dict]:
+    def generate_values(self) -> list[dict]:
         # returns a list of dicts with the generated values
         # Example return:
         # [
@@ -131,7 +131,7 @@ class NodeMapping(BaseMapping):
 
                 # Have PropertyMapping generate a value
                 try:
-                    values = property.generate_values(data_callback)
+                    values = property.generate_values()
                     if len(values) > 1:
                         ModuleLogger().error(f'Property naemd {property.name} generated more than one value: {values}')
                     value = values[0]
@@ -151,7 +151,7 @@ class NodeMapping(BaseMapping):
 
         return self._generated_values
     
-    def generated_values(self, data_callback: callable[[str],any]) -> list[dict]:
+    def generated_values(self) -> list[dict]:
         if self._generated_values is None:
             self.generate_values()
         return self._generated_values

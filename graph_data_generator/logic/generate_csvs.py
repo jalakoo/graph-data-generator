@@ -4,6 +4,58 @@ from graph_data_generator.logger import ModuleLogger
 import io 
 import csv
 
+def generate_csv_from_dictionaries(dict: dict) -> str:
+    """Returns a csv data for dictionary of record data
+
+    Args:
+        dict: Single depth dictioary of key-value pairs representing generated node/relationship property data
+
+    Returns:
+        String csv data
+    """    
+    fieldnames = dict.keys()
+    buffer = io.StringIO()
+    writer = csv.DictWriter(buffer, fieldnames=fieldnames)
+    writer.writeheader()
+
+    for key, value in dict.items():
+        try:
+            writer.writerow(value)
+        except Exception as e:
+            raise Exception(f'Failed to write row for key: {key}: ERROR: {e}')
+    return buffer.getvalue()
+
+def generate_csvs_from_dictionaries(dicts: dict) -> dict[str, str]:
+    """Returns a dictionary of filename : csv data string
+
+    Args:
+        dicts: Dictionary of records to be written to csv. Should contain 'nodes' and'relationships' keys with values being a list of dictionaries
+
+    Returns:
+        A dictionary of {filenames : csv strings}
+    """
+    # Prep result / return object
+    output = {}
+
+    # Process nodes
+    nodes = dicts.get('nodes', None)
+    if nodes is None:
+        raise Exception(f'"nodes" key expected. Got {dicts}')
+    
+    for node_id, node_dict in nodes:
+        csv = generate_csv_from_dictionaries(node_dict)
+        output[node_id] = csv
+
+    # Process optional relationships
+    rels = dict.get('relationships', None)
+    if rels is not None:
+        for rel_id, rel_dict in rels:
+            csv = generate_csv_from_dictionaries(rel_dict)
+            output[rel_id] = csv
+
+    return output
+
+
 def generate_csv(element: BaseMapping) -> str:
     """Returns a csv data for generated data from a subclass of a BaseMapping object
 
@@ -36,7 +88,7 @@ def generate_csv(element: BaseMapping) -> str:
     return buffer.getvalue()
     
 def generate_csvs(mapping: Mapping) -> dict[str, str]:
-    """Returns a dictionary of filename : csv data string
+    """Returns a dictionary of filename : csv data string. Will return the same data for a given Mapping object. To generate a new set of data, running the appropriate Mapping generate() function.
 
     Args:
         properties: Mapping object
@@ -60,3 +112,4 @@ def generate_csvs(mapping: Mapping) -> dict[str, str]:
         output[filename] = values
 
     return output
+

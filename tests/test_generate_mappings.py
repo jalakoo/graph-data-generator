@@ -35,7 +35,7 @@ class TestPropertyMappings:
             sample_generators
         )
         # _uid property always added
-        assert len(mappings) == 2
+        assert len(mappings) == 2, f'Expected 2 mappings in mappings. Instead got {mappings}'
         assert mappings["_uid"].generator.name == "UUID"
         assert mappings["name"].generator.name == "First Name"
 

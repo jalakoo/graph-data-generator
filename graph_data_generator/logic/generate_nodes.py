@@ -8,13 +8,11 @@ from graph_data_generator.logger import ModuleLogger
 
 def generate_a_node_record(
         input: dict, 
-        data_callback: callable[[str],any] = None
         ) -> dict:
     """Generates a single node record.
 
     Args:
         input: List of dictionaries defining node specifications
-        data_callback: Optional callback function for retrieving data from external sources
 
     Returns:
         A dictionary with generated nodes records. Original node config ids as keys. Values are lists of dictionaries
@@ -35,19 +33,17 @@ def generate_a_node_record(
         generator, args = generator_for_raw_property(
             property, 
             generators, 
-            data_callback)
+            )
         output[property_id] = generator.generate(args)
     return output
 
 def generate_node_records(
         input: dict,
-        data_callback: callable[[str], any] = None 
         ) -> list[dict]:
     """Generates a list of node records}.
 
     Args:
         input: Dictionaries defining node specification
-        data_callback: Optional callback function for retrieving data from external sources
 
     Returns:
         A list of dictionaries of generated nodes records.
@@ -68,7 +64,7 @@ def generate_node_records(
 
     for _ in range(count):
         # Generate a single node record
-        node = generate_a_node_record(input, data_callback)
+        node = generate_a_node_record(input)
 
         node["_labels"] = labels
 

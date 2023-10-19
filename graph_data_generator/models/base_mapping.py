@@ -24,12 +24,9 @@ class BaseMapping(abc.ABC):
 
     # TODO: callable signature needs a return type
     @abc.abstractmethod
-    def generate_values(self, data_callback: callable[[str],any])-> list[dict]:
+    def generate_values(self)-> list[dict]:
         """
         Generates new data for the mapping.
-
-        Args:
-            data_callback: Optional callback for getting data from other mapping objects.
         
         Returns:
             A list of dictionary data where each dictionary is a record of the generated data.  
@@ -37,12 +34,9 @@ class BaseMapping(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def generated_values(self, data_callback: callable[[str],any]) -> list[dict]:
+    def generated_values(self) -> list[dict]:
         """
         Retrieves previously generated data. If no data was previously generated, will create new data before returning.
-
-        Args:
-            data_callback: Optional callback for getting data from other mapping objects.
         
         Returns:
             A list of dictionary data where each dictionary is a record of the generated data.

@@ -459,23 +459,23 @@ generators_json = {
         ],
         "type": "Assignment"
     },
-    "reference": {
-        "args": [
-            {
-                "default": "",
-                "label": "Property key name to reference",
-                "type": "String"
-            },
-        ],
-        "code": reference,
-        "description": "Copies a value from another property by the property key name.",
-        "name": "Reference",
-        "tags": [
-            "reference",
-            "pointer",
-        ],
-        "type": "Reference"
-    },
+    # "reference": {
+    #     "args": [
+    #         {
+    #             "default": "",
+    #             "label": "Property key name to reference",
+    #             "type": "String"
+    #         },
+    #     ],
+    #     "code": reference,
+    #     "description": "Copies a value from another property by the property key name.",
+    #     "name": "Reference",
+    #     "tags": [
+    #         "reference",
+    #         "pointer",
+    #     ],
+    #     "type": "Reference"
+    # },
     "string": {
         "args": [
             {

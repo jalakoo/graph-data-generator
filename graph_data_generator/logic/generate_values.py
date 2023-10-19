@@ -9,14 +9,12 @@ from datetime import datetime
 def actual_generator_for_raw_property(
     property_value: str, 
     generators: dict[str, Generator],
-    data_callback: callable[[str], any] = None,
     ) -> tuple[Generator, list[any]]:
     """Returns a generator and args for a property. Returns None if not found.
 
     Args:
         property_value: Stringified JSON object or dictionary of generator specification
         generators: Dictionary of all available generators
-        data_callback: Function to call to get a value from another node or relationship property
 
     Returns:
         A tuple (Generator, list[any]) of the generator to use and args specified by the original generator configuration. Returns (None, None) if not found.
@@ -43,7 +41,7 @@ def actual_generator_for_raw_property(
         return (None, None)
 
     # Should only ever be one match. Return first
-    key, value = obj.items()[0]
+    key, value = list(obj.items())[0]
 
     # Extractor generator specification info
     generator_id = key
@@ -66,7 +64,7 @@ def actual_generator_for_raw_property(
         # Value will be a dot path representation of the node or relationship
         # pass this to the callback for a higher level function with access
         # to all data can pull it from the targeted node or relationship
-        value = data_callback(value)
+        raise Exception("unimplemented")
 
     # Specification didn't match available generators
     if generator is None:
@@ -311,7 +309,6 @@ def assignment_generator_for(
 def generator_for_raw_property(
     property_value: any, 
     generators: dict[str, Generator],
-    data_callback: callable[[str], any] = None
     ) -> tuple[Generator, list[any]]:
     """
         Returns a generator and args for specially formatted property values from the arrows.app JSON file. Attempts to determine if literal or original generator
@@ -340,7 +337,7 @@ def generator_for_raw_property(
     # Function generators are also handled here
     # Returns None if no matching generator found
     if generator is None:
-        generator, args = actual_generator_for_raw_property(property_value, generators, data_callback)
+        generator, args = actual_generator_for_raw_property(property_value, generators)
 
 
     # Default is to use string literal generator

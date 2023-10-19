@@ -49,16 +49,18 @@ class PropertyMapping(BaseMapping):
             return False
         return True
     
-    def generate_values(self, data_callback: callable[[str],any]) -> list[dict]:
+    def generate_values(self) -> list[dict]:
         
         # Generator needed to be assigned before this call
         if self.generator == None:
             raise Exception(f'Property Mapping named "{self.name}" is missing a generator property')
 
+        # TODO: Does not support the callable arg
+        
         result = self.generator.generate(self.args)
         self._generated_values = [result]
         return self._generated_values
     
-    def generated_values(self, data_callback: callable[[str],any]) -> list[dict]:
-        return self._generated_values
+    def generated_values(self) -> list[dict]:
+        return self._generated_values()
 

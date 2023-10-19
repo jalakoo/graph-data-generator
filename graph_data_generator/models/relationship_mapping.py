@@ -99,10 +99,7 @@ class RelationshipMapping(BaseMapping):
             return False
         return True
 
-    def generate_values(
-        self,
-        data_callback: callable[[str],any]
-        )-> list[dict]:
+    def generate_values(self)-> list[dict]:
 
         # Sample return list:
         # [
@@ -193,7 +190,7 @@ class RelationshipMapping(BaseMapping):
 
                 # Generate relationships properties
                 for property_name, property_mapping in self.properties.items():
-                    result[property_name] = property_mapping.generate_values(data_callback)[0]
+                    result[property_name] = property_mapping.generate_values()[0]
 
                 # Add the relationship to the list
                 all_results.append(result)
@@ -202,7 +199,7 @@ class RelationshipMapping(BaseMapping):
         self._generated_values = all_results
         return self._generated_values
         
-    def generated_values(self, data_callback: callable[[str],any]):
+    def generated_values(self):
         if self._generated_values is None:
             self.generate_values()
         return self._generated_values

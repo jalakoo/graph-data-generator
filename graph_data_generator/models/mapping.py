@@ -17,7 +17,7 @@ class Mapping():
     def __init__(self, nodes : dict[str, NodeMapping] = {}, relationships : dict[str, RelationshipMapping] = {}):
         self.nodes = nodes
         self.relationships = relationships
-        self._generated_values = False
+        self._did_generate_values = False
 
     def __str__(self):
         return f"'Mapping':{{'nodes': {self.nodes}, 'relationships': {self.relationships} }})"
@@ -61,7 +61,7 @@ class Mapping():
             return False
         
     def did_generate_values(self):
-        return self._generated_values
+        return self._did_generate_values
     
     def _request_nodes(self, node_caption: str) -> list[NodeMapping]:
         return [node for node in self.nodes.values() if node.caption == node_caption]
@@ -80,3 +80,4 @@ class Mapping():
             nodeMappings.generate_values()
         for relMappings in self.relationships.values():
             relMappings.generate_values()
+        self._did_generate_values = True
