@@ -8,6 +8,7 @@ class TestGenerator:
     # Tests that a Generator object can be created with valid input parameters
     def test_create_generator(self):
         generator = Generator(
+            gid="G1",
             name='Test Generator',
             type=GeneratorType.STRING,
             description='This is a test generator',
@@ -15,6 +16,7 @@ class TestGenerator:
             args=[],
             tags=[]
         )
+        assert generator.gid == 'G1'
         assert generator.name == 'Test Generator'
         assert generator.type == GeneratorType.STRING
         assert generator.description == 'This is a test generator'
@@ -26,6 +28,7 @@ class TestGenerator:
     def test_to_dict(self, sample_generators):
         test_code = sample_generators['uuid']
         generator = Generator(
+            gid="G1",
             name='Test Generator',
             type=GeneratorType.STRING,
             description='This is a test generator',
@@ -34,6 +37,7 @@ class TestGenerator:
             tags=[]
         )
         expected_dict = {
+            'gid': "G1",
             'name': 'Test Generator',
             'description': 'This is a test generator',
             'code': "UUID",
@@ -47,6 +51,7 @@ class TestGenerator:
     def test_missing_name(self):
         with pytest.raises(Exception) as e:
             _ = Generator(
+                gid="G1",
                 type=GeneratorType.STRING,
                 description='This is a test generator',
                 code='test code',
@@ -58,6 +63,7 @@ class TestGenerator:
     def test_missing_type(self):
         with pytest.raises(Exception) as e:
             _ = Generator(
+                gid="G1",
                 name='Test Generator',
                 description='This is a test generator',
                 code='test code',
@@ -69,6 +75,7 @@ class TestGenerator:
     def test_missing_description(self):
         with pytest.raises(Exception) as e:
             _ = Generator(
+                gid="G1",
                 name='Test Generator',
                 type=GeneratorType.STRING,
                 code='test code',

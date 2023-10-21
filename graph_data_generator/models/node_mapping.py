@@ -17,7 +17,8 @@ class NodeMapping(BaseMapping):
             properties = {},
             count_generator = None,
             count_args = [],
-            key_property = None
+            key_property = None,
+            filename = None
         )
 
     def __init__(
@@ -30,7 +31,8 @@ class NodeMapping(BaseMapping):
         count_generator: Generator,
         count_args: list[any],
         key_property: PropertyMapping,
-        default_count : int = 1
+        default_count : int = 1,
+        filename: str = None
         ):
         self.nid = nid
         self.position = position
@@ -41,34 +43,11 @@ class NodeMapping(BaseMapping):
         self.count_args = count_args
         self.default_count = default_count
         self.key_property = key_property # Property to use as unique key for this node
-        self.generated_values = None # Will be a list[dict] when generated
+        self._generated_values = None # Will be a list[dict] when generated
+        self._filename = filename
 
     def __str__(self):
         return f"NodeMapping(nid={self.nid}, caption={self.caption}, labels={self.labels}, properties={self.properties}, count_generator={self.count_generator}, count_args={self.count_args}, default_count={self.default_count}, key_property={self.key_property})"
-
-    # def __repr__(self):
-    #     return self.__str__()
-
-    # def __eq__(self, other):
-    #     if not isinstance(other, NodeMapping):
-    #         return False
-    #     if self.nid != other.nid:
-    #         return False
-    #     if self.caption != other.caption:
-    #         return False
-    #     if self.labels != other.labels:
-    #         return False
-    #     if self.properties != other.properties:
-    #         return False
-    #     if self.count_generator != other.count_generator:
-    #         return False
-    #     if self.count_args != other.count_args:
-    #         return False
-    #     if self.default_count != other.default_count:
-    #         return False
-    #     if self.key_property != other.key_property:
-    #         return False
-    #     return True
 
     def to_dict(self):
         properties = {}
@@ -90,6 +69,9 @@ class NodeMapping(BaseMapping):
         }
 
     def filename(self):
+        if self._filename is not None:
+            return self._filename
+        # default
         return f"{self.caption.lower()}_{self.nid.lower()}"
 
     # TODO: Verify unique keys are respected during generation
@@ -137,6 +119,9 @@ class NodeMapping(BaseMapping):
 
         for _ in range(count):
             node_result = {}
+
+            # TODO: Sort properties so reference generators are last
+
             for property_id, property in self.properties.items():
                 # Pass literal values
                 if isinstance(property, PropertyMapping) == False:
@@ -160,8 +145,13 @@ class NodeMapping(BaseMapping):
             all_results.append(node_result)
         
         # Store and return all_results
-        self.generated_values = all_results
+        self._generated_values = all_results
 
-        ModuleLogger().debug(f'Node mapping named {self.caption} finished generating {len(self.generated_values)} values')
+        ModuleLogger().debug(f'Node mapping named {self.caption} finished generating {len(self._generated_values)} values')
 
-        return self.generated_values
+        return self._generated_values
+    
+    def generated_values(self) -> list[dict]:
+        if self._generated_values is None:
+            self.generate_values()
+        return self._generated_values

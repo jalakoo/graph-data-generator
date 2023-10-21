@@ -8,46 +8,71 @@ from datetime import datetime
 # ORIGINAL GENERATOR ASSIGNMENT
 def actual_generator_for_raw_property(
     property_value: str, 
-    generators: dict[str, Generator]
+    generators: dict[str, Generator],
     ) -> tuple[Generator, list[any]]:
-    """Returns a generator and args for a property. Returns None if not found."""
+    """Returns a generator and args for a property. Returns None if not found.
+
+    Args:
+        property_value: Stringified JSON object or dictionary of generator specification
+        generators: Dictionary of all available generators
+
+    Returns:
+        A tuple (Generator, list[any]) of the generator to use and args specified by the original generator configuration. Returns (None, None) if not found.
+    """
+
     # Sample property_values: 
     #   "{\"company_name\":[]}"
     
+    # Parse property if it is stringified JSON
     if isinstance(property_value, str):
         try:
             obj = json.loads(property_value)
         except Exception as e:
             ModuleLogger().warning(f'Could not parse JSON string: {property_value}')
             return (None, None)
+        
+    # property value already a dictionary
     elif isinstance(property_value, dict):
         obj = property_value
+
+    # property_value is an unexpected value type
     else:
         ModuleLogger().error(f'Raw Generator values must by of type str or dict. {property_value} received.')
+        return (None, None)
+
     # Should only ever be one match. Return first
-    for key, value in obj.items():
-        generator_id = key
-        generator = generators.get(generator_id, None)
+    key, value = list(obj.items())[0]
 
-        # Check special function generators
-        if generator is not None and generator.type == GeneratorType.FUNCTION:
-            # Extract the generators from the args and pass tuples of (Generator, Args) as higher level args 
-            ModuleLogger().debug(f'Function generator {generator.name} detected. Arg value: {value}')
+    # Extractor generator specification info
+    generator_id = key
+    generator = generators.get(generator_id, None)
 
-            # Value of function generators is a list of JSON object specifications for other generators. Retrieve these and insert them as arg values to be run by the actual function generators that are expecting tuples of (Generator, Args)
-            new_value = []
-            for gen_spec in value:
-                gen, args = generator_for_raw_property(gen_spec, generators)
-                new_value.append((gen, args))
-            value = new_value
-            
-        if generator is None:
-            ModuleLogger().warning(f'Generator_id "{generator_id}" not found in generators.')
-            return (None, None)
-        args = value
-        return (generator, args)
+    # Check special generator types
+    if generator is not None and generator.type == GeneratorType.FUNCTION:
+        # Extract the generators from the args and pass tuples of (Generator, Args) as higher level args 
+        ModuleLogger().debug(f'Function generator {generator.name} detected. Arg value: {value}')
 
-    return (None, None)
+        # Value of function generators is a list of JSON object specifications for other generators. Retrieve these and insert them as arg values to be run by the actual function generators that are expecting tuples of (Generator, Args)
+        new_value = []
+        for gen_spec in value:
+            gen, args = generator_for_raw_property(gen_spec, generators)
+            new_value.append((gen, args))
+        value = new_value
+        
+    if generator is not None and generator.type == GeneratorType.REFERENCE:
+        # Reference generators need data from other nodes or relationships
+        # Value will be a dot path representation of the node or relationship
+        # pass this to the callback for a higher level function with access
+        # to all data can pull it from the targeted node or relationship
+        raise Exception("unimplemented")
+
+    # Specification didn't match available generators
+    if generator is None:
+        ModuleLogger().warning(f'Generator_id "{generator_id}" not found in generators.')
+        return (None, None)
+    
+    args = value
+    return (generator, args)
 
 # KEYWORD GENERATOR ASSIGNMENT
 def keyword_generator_for_raw_property(
@@ -283,7 +308,7 @@ def assignment_generator_for(
 
 def generator_for_raw_property(
     property_value: any, 
-    generators: dict[str, Generator]
+    generators: dict[str, Generator],
     ) -> tuple[Generator, list[any]]:
     """
         Returns a generator and args for specially formatted property values from the arrows.app JSON file. Attempts to determine if literal or original generator
@@ -304,7 +329,7 @@ def generator_for_raw_property(
     if generator is None:
         generator, args = keyword_generator_for_raw_property(property_value, generators)
 
-    # Original Sample expected string: "{\"company_name\":[]}"
+    # Original Generator specifications expected string: "{\"company_name\":[]}"
     # New literal examples: 
     #     "{\"company_name\":\"Acme\"}"
     #     "{\"company_name\":[\"Acme\"]}"

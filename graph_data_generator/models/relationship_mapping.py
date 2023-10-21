@@ -6,8 +6,9 @@ from graph_data_generator.logger import ModuleLogger
 import sys
 from copy import deepcopy
 from graph_data_generator.utils.list_utils import clean_list
+from graph_data_generator.models.base_mapping import BaseMapping
 
-class RelationshipMapping():
+class RelationshipMapping(BaseMapping):
 
     @staticmethod
     def empty():
@@ -22,7 +23,8 @@ class RelationshipMapping():
             filter_generator = None,
             filter_args = [],
             assignment_generator = None,
-            assignment_args = []
+            assignment_args = [],
+            filename = None
         )
 
     def __init__(
@@ -42,7 +44,7 @@ class RelationshipMapping():
         # For filtering from nodes
         filter_generator: Generator = None,
         filter_args: list[any] = [],
-
+        filename: str = None
         ):
         self.rid = rid
         self.type = type
@@ -51,11 +53,12 @@ class RelationshipMapping():
         self.properties = properties
         self.count_generator = count_generator
         self.count_args = clean_list(count_args)
-        self.generated_values = None
+        self._generated_values = None
         self.filter_generator = filter_generator
         self.filter_generator_args = clean_list(filter_args)
         self.assignment_generator = assignment_generator
         self.assignment_args = clean_list(assignment_args)
+        self._filename = filename
 
     def __str__(self):
         return f"RelationshipMapping(rid={self.rid}, type={self.type}, from_node={self.from_node}, to_node={self.to_node}, properties={self.properties}, count_generator={self.count_generator}, count_args={self.count_args})"
@@ -76,6 +79,9 @@ class RelationshipMapping():
         }
 
     def filename(self):
+        if self._filename is not None:
+            return self._filename
+        # default
         from_node_name = self.from_node.caption.lower()
         to_node_name = self.to_node.caption.lower()
         return f"{from_node_name}_{self.type.lower()}_{to_node_name}_{self.rid.lower()}"
@@ -93,16 +99,7 @@ class RelationshipMapping():
             return False
         return True
 
-    def generate_values(
-        self,
-        )-> list[dict]:
-
-
-        # Make sure from and to nodes have generated values already
-        if self.from_node.generated_values == None:
-            self.from_node.generate_values()
-        if self.to_node.generated_values == None:
-            self.to_node.generate_values()
+    def generate_values(self)-> list[dict]:
 
         # Sample return list:
         # [
@@ -120,16 +117,18 @@ class RelationshipMapping():
         # TODO: Run filter generator here to determine which source nodes to process
 
         # Make a copy of the generated list
-        values = deepcopy(self.to_node.generated_values)
+        values = self.to_node.generated_values()[:]
+        original_values = self.to_node.generated_values()[:]
 
         # Iterate through every generated source node
-        for value_dict in self.from_node.generated_values:
+        for value_dict in self.from_node.generated_values():
             # dict of property names and generated values
 
             # Decide on how many of these relationships to generate
             count = 0
             try:
                 count = self.count_generator.generate(self.count_args)
+                ModuleLogger().debug(f'{self.from_node.caption} node: {self.type} relationship count: {count}')
             except:
                 # Generator not found or other code error
                 raise Exception(f"Relationship mapping could not generate a number of relationships to continue generation process, error: {str(sys.exc_info()[0])}")
@@ -152,13 +151,18 @@ class RelationshipMapping():
                 # Select a random target node
 
                 if values is None or len(values) == 0:
-                    # TODO: This appears to break the randomization
+                    # No values to run
                     continue
 
                 # Extract results. Values will be passed back through the next iteration in case the generator returns a modified list
 
                 # TODO: values does not change after this call
                 to_node_value_dict, new_values = self.assignment_generator.generate(values)
+                
+                # Error handling
+                if to_node_value_dict is None:
+                    ModuleLogger().error(f'Unexpected value returned from assignment generator: {self.assignment_generator} for relationship: {self}')
+                    continue
 
                 values = new_values
 
@@ -179,7 +183,10 @@ class RelationshipMapping():
                     f'_to_{to_node_key_property_name}': to_node_key_property_value
                 }
 
-                # Generate the properties
+
+                # TODO: Sort properties so reference generators are last
+
+                # Generate relationships properties
                 for property_name, property_mapping in self.properties.items():
                     result[property_name] = property_mapping.generate_values()[0]
 
@@ -187,6 +194,10 @@ class RelationshipMapping():
                 all_results.append(result)
 
         # Store results for reference
-        self.generated_values = all_results
-        return self.generated_values
+        self._generated_values = all_results
+        return self._generated_values
         
+    def generated_values(self):
+        if self._generated_values is None:
+            self.generate_values()
+        return self._generated_values

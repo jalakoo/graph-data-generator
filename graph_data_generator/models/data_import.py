@@ -232,7 +232,7 @@ class DataImporterJson():
         ):
 
         # In case relationshipMapping has not yet generated data
-        if relationship.generated_values is None:
+        if relationship._generated_values is None:
             relationship.generate_values()
 
         # Add to graph:relationships

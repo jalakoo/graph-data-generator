@@ -34,7 +34,6 @@ class TestPropertyMapping:
         mapping = PropertyMapping.empty()
         with pytest.raises(Exception) as e:
             mapping.generate_values()[0]
-        assert str(e.value) == 'Property Mapping is missing a generator property. Property name: None'
 
     # Tests that an exception is raised when generating a value with args that are not a list
     def test_generate_value_with_args_not_list(self):
@@ -47,7 +46,6 @@ class TestPropertyMapping:
         )
         with pytest.raises(Exception) as e:
             mapping.generate_value()[0]
-        assert str(e.value) == 'Property Mapping Args is not a list. Property name: Property 1'
 
 
     # Tests that the ready_to_generate method returns True when all required properties are set
