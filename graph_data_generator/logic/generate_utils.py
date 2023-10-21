@@ -27,10 +27,10 @@ def property_contains_reference_generator(obj: str) -> bool:
         keys = [*spec]
         if len(keys) != 1:
             # Not sure what was passed in as a value
-            print(f'ERROR: Invalid value passed to reference generator: {obj}')
+            ModuleLogger().error(f'ERROR: Invalid value passed to reference generator: {obj}')
             return False
         if keys[0] not in reference_generator_names_only:
-            print(f'Value passed to property is not a reference generator: {obj}')
+            ModuleLogger().warning(f'Value passed to property is not a reference generator: {obj}')
             return False
         return True
     except:

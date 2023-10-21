@@ -23,16 +23,30 @@ logger = ModuleLogger()
 logger.is_enabled = False
   
 def start_logging():
+    """
+    Enables logging from the graph-data-generator module. Log level matches the existing log level of the calling module.
+    """
     logger = ModuleLogger()
     logger.is_enabled = True
     logger.info("Graph-Data-Generator logging enabled")
 
 def stop_logging():
+    """
+    Surpresses logging from the graph-data-generator module.
+    """
     ModuleLogger().info(f'Discontinuing logging')
     ModuleLogger().is_enabled = False
 
 def generate_mapping(input: str|dict)-> Mapping:
+    """
+    Generates a mapping file from a JSON source.
 
+    Args:
+        input: A stringified JSON or dict object containing specifications for nodes and relationship data. Arrows-app compatible .json format.
+    
+    Returns:
+        A Mapping object
+    """
     # If json_object is a string, load and convert into a dict object
     if isinstance(input, str) is True:
         try:
@@ -46,37 +60,20 @@ def generate_mapping(input: str|dict)-> Mapping:
         generators
     )
 
-def generate(
-    json_source : str | dict,
+def package(
+    mapping: Mapping,
     output_format : str = 'bytes',
-    enable_logging : bool = False
-) -> io.BytesIO:
+) -> str | io.BytesIO:
     """
-    Generates a zip file of data based on the provided JSON object.
+    Creates a zip file from a Mapping object. Will return the same data unless the mapping's generate_value() function is called prior.
 
     Args:
-        json_source (any): A stringified JSON or dict object containing the mapping of nodes and relationships to generate.
-        output_format (str, optional): The format of the output. Defaults to 'bytes' which can be added directly to a flask make_response() call. Otther options are 'string'.
+        mapping: A Mapping object.
     
     Returns:
-        An io.BytesIO file
-    """
+        A string or bytes representing the .zip file.
+    """  
 
-    if enable_logging:
-        start_logging()
-
-    # Convert config to a mapping file
-    mapping = generate_mapping(json_source)
-
-    # Generate data
-    try:
-        dicts = generate_dictionaries(mapping)
-        nodes = len(dicts["nodes"])
-        rels = len(dicts["relationships"])
-        ModuleLogger().info(f'Generated {nodes} nodes and {rels} records')
-    except Exception as e:
-        ModuleLogger().error(f'Error generating data as dictionaries: {e}')
-        raise e
 
     # Generate csv files from generated data
     try:
@@ -114,3 +111,74 @@ def generate(
         result = bytes.getvalue()
 
     return result
+
+def generate(
+    json_source : str | dict,
+    output_format : str = 'bytes',
+    enable_logging : bool = False
+) -> str | io.BytesIO:
+    """
+    Generates a zip file of data based on the provided JSON object.
+
+    Args:
+        json_source (any): A stringified JSON or dict object containing the mapping of nodes and relationships to generate. Arrows-app compatible .json format.
+        output_format (str, optional): The format of the output. Defaults to 'bytes' which can be added directly to a flask make_response() call. Otther options are 'string'.
+    
+    Returns:
+        An io.BytesIO file
+    """
+
+    if enable_logging:
+        start_logging()
+
+    # Convert config to a mapping file
+    mapping = generate_mapping(json_source)
+
+    return package(mapping, output_format)
+
+    # # Generate data
+    # try:
+    #     dicts = generate_dictionaries(mapping)
+    #     nodes = len(dicts["nodes"])
+    #     rels = len(dicts["relationships"])
+    #     ModuleLogger().info(f'Generated {nodes} nodes and {rels} records')
+    # except Exception as e:
+    #     ModuleLogger().error(f'Error generating data as dictionaries: {e}')
+    #     raise e
+
+    # # Generate csv files from generated data
+    # try:
+    #     csvs = generate_csvs(mapping)
+    #     ModuleLogger().info(f'Generated {len(csvs)} csv files')
+    # except Exception as e:
+    #     ModuleLogger().error(f'Error generating csvs: {e}')
+    #     raise e
+
+    # # Generate data import json
+    # try:
+    #     json = generate_data_import_json(mapping)
+    #     ModuleLogger().info(f'Generated data import json')
+    # except Exception as e:
+    #     ModuleLogger().error(f'Error generating data import json: {e}')
+    #     raise e
+
+    # # Add data import json with csvs for zip file
+    # csvs["neo4j_importer_model.json"] = json
+
+    # try:
+    #     # Package into zip file
+    #     bytes = generate_zip(csvs)
+    #     ModuleLogger().info(f'Generated zip file')
+    # except Exception as e:
+    #     ModuleLogger().error(f'Error generating zip file: {e}')
+    #     raise e
+
+    # # Return based on file output type
+    # if output_format == 'string':
+    #     data_bytes = bytes.getvalue()
+    #     result = data_bytes.decode('utf-8')
+    # else:
+    #     bytes.seek(0)
+    #     result = bytes.getvalue()
+
+    # return result

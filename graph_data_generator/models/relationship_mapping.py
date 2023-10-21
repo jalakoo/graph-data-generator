@@ -117,8 +117,6 @@ class RelationshipMapping(BaseMapping):
         # TODO: Run filter generator here to determine which source nodes to process
 
         # Make a copy of the generated list
-        print(f'to_node: {self.to_node}')
-    
         values = self.to_node.generated_values()[:]
         original_values = self.to_node.generated_values()[:]
 
