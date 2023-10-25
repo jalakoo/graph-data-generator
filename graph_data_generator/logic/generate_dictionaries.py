@@ -23,11 +23,15 @@ def generate_dictionaries(mapping: Mapping) -> dict:
     for nodeMapping in mapping.nodes.values():
         values : list[dict] = nodeMapping.generated_values()
         key = f'{nodeMapping.caption}'
-        output['nodes'][key] = values
+        list = output['nodes'].get(key, [])
+        list.extend(values)
+        output['nodes'][key] = list
     
     for relMapping in mapping.relationships.values():
         values : list[dict] = relMapping.generated_values()
         key = f'{relMapping.type}'
-        output['relationships'][key] = values
+        list = output['relationships'].get(key, [])
+        list.extend(values)
+        output['relationships'][key] = list
 
     return output
