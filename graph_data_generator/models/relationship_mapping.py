@@ -97,6 +97,8 @@ class RelationshipMapping(BaseMapping):
             return False
         if self.count_generator is None:
             return False
+        if self.assignment_generator is None:
+            return False
         return True
 
     def generate_values(self)-> list[dict]:
@@ -150,14 +152,16 @@ class RelationshipMapping(BaseMapping):
             for i in range(count):
                 # Select a random target node
 
-                if values is None or len(values) == 0:
-                    # No values to run
-                    continue
+                # if values is None or len(values) == 0:
+                #     # No values to run
+                #     continue
 
                 # Extract results. Values will be passed back through the next iteration in case the generator returns a modified list
 
-                # TODO: values does not change after this call
-                to_node_value_dict, new_values = self.assignment_generator.generate(values)
+                composite_values = [values, original_values]
+
+                # TODO: Why are values not changing after this call
+                to_node_value_dict, new_values = self.assignment_generator.generate(composite_values)
                 
                 # Error handling
                 if to_node_value_dict is None:
@@ -175,6 +179,7 @@ class RelationshipMapping(BaseMapping):
 
                 # Get key property name and value for target record
                 to_node_key_property_name = self.to_node.key_property.name
+                # TODO: Adding an ASSIGNMENT key breaks here - Why?
                 to_node_key_property_value = to_node_value_dict[to_node_key_property_name]
 
                 # Generate the relationship

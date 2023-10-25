@@ -3,6 +3,11 @@ import random
 def generate(
     args: list[any]
     ) -> tuple[dict, list[dict]]:
-    to_node_values = args
-    result = random.choice(to_node_values)
-    return (result, to_node_values)
+    
+    if isinstance(args, list) == False:
+        return (None, [])
+    if len(args) == 0:
+        return (None, [])
+    choices = args[0]
+    result = random.choice(choices)
+    return (result, args)

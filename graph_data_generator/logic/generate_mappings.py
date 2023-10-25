@@ -21,8 +21,7 @@ def propertymappings_for_raw_properties(
     {
         "name": "{\"company_name\":[]}",
         "uuid": "{\"uuid\":[8]}",
-        "{count}": "{\"int\":[1]}",
-        "{key}": "uuid"
+        "COUNT": "{\"int\":[1]}"
     }, 
     
     Parameters:
@@ -39,6 +38,7 @@ def propertymappings_for_raw_properties(
         raise Exception(f'generate_mapping.py: propertymappings_for_raw_properties: No generators assignment received.')
 
     raw_keys = raw_properties.keys()
+
     # Assign uuid if not key property assignment was made
     if "{key}" not in raw_keys and "KEY" not in raw_keys:
         raw_properties["KEY"] = "_uid"
@@ -47,13 +47,13 @@ def propertymappings_for_raw_properties(
     # Cycle through all properties and convert to a property mapping
     for key, value in raw_properties.items():
 
-        # Skip any keys with { } (brackets) as these are special cases for defining count/assignment/filter generators
+        # Skip any keys with { } (brackets) as these are special legacy cases for defining count/assignment/filter generators
         if key.startswith('{') and key.endswith('}'):
             continue
 
-        # Skip special COUNT and KEY literals
-        if key == "COUNT" or key == "KEY":
-                continue
+        # Skip special keywords
+        if key == "COUNT" or key == "KEY" or key == "ASSIGNMENT":
+            continue
 
         try:
             generator, args = generator_for_raw_property(value, generators)
@@ -98,8 +98,7 @@ def node_mappings_from(
             "properties": {
                 "name": "{\"company_name\":[]}",
                 "uuid": "{\"uuid\":[8]}}",
-                "{count}": "{{"int\":[1]}",
-                "{key}": "uuid"
+                "COUNT": "{{"int\":[1]}"
             },
             "style": {}
         }
@@ -214,9 +213,8 @@ def relationshipmappings_from(
         "toId": "n0",
         "type": "EMPLOYS",
         "properties": {
-          "{count}": "{\"int\":[10]}",
-          "{assignment}": "{\"exhaustive_random\":[]}",
-          "{filter}": "{string_from_list:[]}"
+          "COUNT": "{\"int\":[10]}",
+          "ASSIGNMENT": "{\"exhaustive_random\":[]}"
         },
         "style": {}
       },
@@ -263,6 +261,7 @@ def relationshipmappings_from(
         # TODO: Support COUNT key type
         count_generator_config = properties.get("COUNT", None)
         if count_generator_config is None:
+            # Legacy keyword
             count_generator_config = properties.get("{count}", None)
             if count_generator_config is None:
                 count_generator_config = '{"int_range": [1,3]}'
@@ -270,6 +269,7 @@ def relationshipmappings_from(
 
         assignment_generator_config = properties.get("ASSIGNMENT", None)
         if assignment_generator_config is None:
+            # Legacy keyword
             assignment_generator_config = properties.get("{assignment}", None)
             # If missing, use ExhaustiveRandom
             if assignment_generator_config is None:
@@ -281,16 +281,19 @@ def relationshipmappings_from(
         except Exception as e:
             raise Exception(f"Could not find count generator for relationship: {relationship_dict}: COUNT CONFIG: {count_generator_config}: ERROR: {e}")
 
+        # Get proper generator for assignment generator
+        # TODO: Explicitly assigned generators always causes an error
+        try:
+            assignment_generator, assignment_args = assignment_generator_for(assignment_generator_config, generators)
+        except Exception as e:
+            raise Exception(f"Could not get assignment generator for relationship: {relationship_dict}: {e}")
+        
         # Create property mappings for properties
         try:
             property_mappings = propertymappings_for_raw_properties(properties, generators)
         except Exception as e:
             raise Exception(f"Could not create property mappings for relationship: {relationship_dict}: {e}")
 
-        try:
-            assignment_generator, assignment_args = assignment_generator_for(assignment_generator_config, generators)
-        except Exception as e:
-            raise Exception(f"Could not get assignment generator for relationship: {relationship_dict}: {e}")
 
         from_node = nodes.get(relationship_dict["fromId"], None)
         if from_node is None:
