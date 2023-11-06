@@ -161,7 +161,7 @@ def node_mappings_from(
                 count_generator_config = literal
             if count_generator_config is None:
                 # Default to a random int range
-                count_generator_config = '{"int_range": [1,100]}'
+                count_generator_config = '{"int_range": [1,10]}'
 
         # Get proper generators for count generator
         try:
