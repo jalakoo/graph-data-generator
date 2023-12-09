@@ -203,7 +203,7 @@ generators_json = {
             }
         ],
         "code": exhaustive_random,
-        "description": "Assigns each source node to a random target node, until target node records are exhausted. No duplicates, no orphan to nodes.",
+        "description": "Assigns each source node to a random target node, until target node records are exhausted.",
         "name": "Exhaustive Random",
         "tags": [
             "exhaustive"
