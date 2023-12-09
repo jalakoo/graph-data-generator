@@ -10,7 +10,7 @@ from graph_data_generator.generators import bool, catch_phrase, city, company_na
 from graph_data_generator.generators import add_floats, add_ints, add_strings
 
 # Assignment Generators
-from graph_data_generator.generators import pure_random, exhaustive_random, exhaustive_random_repeating, hierarchal_random
+from graph_data_generator.generators import pure_random, exhaustive_random, sequential
 
 # Reference generators
 from graph_data_generator.generators import reference
@@ -490,6 +490,27 @@ generators_json = {
     #     ],
     #     "type": "Reference"
     # },
+    "sequential": {
+        "args": [
+            {
+                "default": False,
+                "label": "Allow repeating. Should repeat creating relationships after initial list of target nodes have all been assigned",
+                "type": "Boolean"
+            },
+            {
+                "default": False,
+                "label": "Allow circular reference. Source nodes be able to reference nodes that already reference themselves for this relationship type",
+                "type": "Boolean"
+            }
+        ],
+        "code": sequential,
+        "description": "Assigns each source node to the next node in the generated list. Continues until node records are exhausted. No duplicates, no orphaned nodes.",
+        "name": "Sequential",
+        "tags": [
+            "sequential"
+        ],
+        "type": "Assignment"
+    },
     "string": {
         "args": [
             {
