@@ -107,6 +107,7 @@ Types of Generators:
 | assignment | Used to determine how to exhaust a source list. ie relationships generation |
 | function | Combines output from multiple generators |
 
+
 *Function Generators*
 Function generators allow combining output from multiple generators. Use other generator specifications in it's argument in the order they should be combined in.
 

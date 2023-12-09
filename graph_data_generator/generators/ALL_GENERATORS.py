@@ -4,13 +4,13 @@
 from graph_data_generator.models.generator import generators_from_json
 
 # Regular generators
-from graph_data_generator.generators import bool, catch_phrase, city, company_name, country, date, email, first_name, float, float_from_list, float_range, int, int_from_list, int_range, last_name, lorem_paragraphs, loremtext_sentence, loremtext_words, md5, string_from_csv, string_from_list, string_literal, technical_phrase, uri, uuid
+from graph_data_generator.generators import bool, catch_phrase, city, company_name, country, date, email, exhaustive_random_repeating, exhaustive_random_selfless, first_name, float, float_from_list, float_range, int, int_from_list, int_range, last_name, lorem_paragraphs, loremtext_sentence, loremtext_words, md5, string_from_csv, string_from_list, string_literal, technical_phrase, uri, uuid
 
 # Functional generators
 from graph_data_generator.generators import add_floats, add_ints, add_strings
 
 # Assignment Generators
-from graph_data_generator.generators import pure_random, exhaustive_random
+from graph_data_generator.generators import pure_random, exhaustive_random, exhaustive_random_repeating, hierarchal_random
 
 # Reference generators
 from graph_data_generator.generators import reference
@@ -190,7 +190,18 @@ generators_json = {
         "type": "String"
     },
     "exhaustive_random": {
-        "args": [],
+        "args": [
+            {
+                "default": False,
+                "label": "Allow repeating. Should repeat creating relationships after initial list of target nodes have all been assigned",
+                "type": "Boolean"
+            },
+            {
+                "default": False,
+                "label": "Allow circular reference. Source nodes be able to reference nodes that already reference themselves for this relationship type",
+                "type": "Boolean"
+            }
+        ],
         "code": exhaustive_random,
         "description": "Assigns each source node to a random target node, until target node records are exhausted. No duplicates, no orphan to nodes.",
         "name": "Exhaustive Random",
