@@ -17,5 +17,6 @@ def generate(
 
     # Target nodes
     choices = args[2]
+
     result = random.choice(choices)
-    return (result, args)
+    return (result, choices)
