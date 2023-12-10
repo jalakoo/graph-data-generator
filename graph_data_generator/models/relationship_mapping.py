@@ -158,29 +158,24 @@ class RelationshipMapping(BaseMapping):
 
                 # Extract results. Values will be passed back through the next iteration in case the generator returns a modified list
 
-                composite_values = [values, original_values]
+                ModuleLogger().debug(f"Relationship: {self} Assignement args: {self.assignment_args}")
+
+                composite_values = [self.assignment_args, value_dict, values, original_values]
 
                 # TODO: Why are values not changing after this call
                 to_node_value_dict, new_values = self.assignment_generator.generate(composite_values)
                 
-                # Error handling
+                # Assignment Generator hit an end
                 if to_node_value_dict is None:
-                    ModuleLogger().error(f'Unexpected value returned from assignment generator: {self.assignment_generator} for relationship: {self}')
+                    ModuleLogger().debug(f'End of assignment generator reached: {self.assignment_generator} for relationship: {self}')
                     continue
-
-                values = new_values
-
-                # Types of randomization generators to consider:
-                # - Pure Random
-                # - Random with a bias towards nodes with fewer relationships
-                # - Random with a bias towards nodes with more relationships
-                # - Random Unique (no duplicates)
-                # - Random Exhaustive (attempt to exhaust all nodes before repeating)
 
                 # Get key property name and value for target record
                 to_node_key_property_name = self.to_node.key_property.name
                 # TODO: Adding an ASSIGNMENT key breaks here - Why?
                 to_node_key_property_value = to_node_value_dict[to_node_key_property_name]
+
+                values = new_values
 
                 # Generate the relationship
                 result = {

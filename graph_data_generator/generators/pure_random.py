@@ -8,6 +8,15 @@ def generate(
         return (None, [])
     if len(args) == 0:
         return (None, [])
-    choices = args[0]
+    
+    # Options
+    _ = args[0]
+
+    # Origin node
+    _ = args[1]
+
+    # Target nodes
+    choices = args[2]
+
     result = random.choice(choices)
-    return (result, args)
+    return (result, choices)

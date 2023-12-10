@@ -4,13 +4,13 @@
 from graph_data_generator.models.generator import generators_from_json
 
 # Regular generators
-from graph_data_generator.generators import bool, catch_phrase, city, company_name, country, date, email, first_name, float, float_from_list, float_range, int, int_from_list, int_range, last_name, lorem_paragraphs, loremtext_sentence, loremtext_words, md5, string_from_csv, string_from_list, string_literal, technical_phrase, uri, uuid
+from graph_data_generator.generators import bool, catch_phrase, city, company_name, country, date, email, first_name, float, float_from_list, float_range, hierarchical, int, int_from_list, int_range, last_name, lorem_paragraphs, loremtext_sentence, loremtext_words, md5, string_from_csv, string_from_list, string_literal, technical_phrase, uri, uuid
 
 # Functional generators
 from graph_data_generator.generators import add_floats, add_ints, add_strings
 
 # Assignment Generators
-from graph_data_generator.generators import pure_random, exhaustive_random
+from graph_data_generator.generators import pure_random, exhaustive_random, hierarchical, exhaustive_random_repeating
 
 # Reference generators
 from graph_data_generator.generators import reference
@@ -190,12 +190,35 @@ generators_json = {
         "type": "String"
     },
     "exhaustive_random": {
-        "args": [],
+        "args": [
+            {
+                "default": False,
+                "label": "Allow circular reference. Source nodes able to reference themselves for this relationship type. Default False.",
+                "type": "Boolean"
+            }
+        ],
         "code": exhaustive_random,
-        "description": "Assigns each source node to a random target node, until target node records are exhausted. No duplicates, no orphan to nodes.",
+        "description": "Assigns each source node to a random target node, until target node records are exhausted. Further relationship generation will stop when this occurs.",
         "name": "Exhaustive Random",
         "tags": [
             "exhaustive"
+        ],
+        "type": "Assignment"
+    },
+    "exhaustive_random_repeating": {
+        "args": [
+            {
+                "default": False,
+                "label": "Allow circular reference. Source nodes able to reference themselves for this relationship type. Default False.",
+                "type": "Boolean"
+            }
+        ],
+        "code": exhaustive_random_repeating,
+        "description": "Assigns each source node to a random target node until target node records are exhausted. When list is exhausted, it will be regenerated to continue until until all source nodes have generated this relationship type.",
+        "name": "Exhaustive Random Repeating",
+        "tags": [
+            "exhaustive",
+            "repeating"
         ],
         "type": "Assignment"
     },
@@ -280,6 +303,23 @@ generators_json = {
             "price"
         ],
         "type": "Float"
+    },
+    "hierarchical": {
+        "args": [
+            {
+                "default": False,
+                "label": "Allow circular reference. Source nodes can reference themselves for this relationship type. Default False.",
+                "type": "Boolean"
+            }
+        ],
+        "code": hierarchical,
+        "description": "Assigns each source node to the next node in the generated list. Continues until node records are exhausted.",
+        "name": "Hierarchical",
+        "tags": [
+            "heirarchical",
+            "org chart"
+        ],
+        "type": "Assignment"
     },
     "int_from_list": {
         "args": [
@@ -455,7 +495,7 @@ generators_json = {
     "pure_random": {
         "args": [],
         "code": pure_random,
-        "description": "Randomly assigns to a target node. Duplicates and orphan nodes possible.",
+        "description": "Randomly assigns to a target node. Self referencing and orphan nodes possible.",
         "name": "Pure Random",
         "tags": [
             "random"

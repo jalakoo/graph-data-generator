@@ -4,17 +4,17 @@ from graph_data_generator.logger import ModuleLogger
 import json
 
 # This will only work for one source node cycle
-exhaustive_random_cache = {}
+exhaustive_random_repeating_cache = {}
 
 def str2bool(v):
   return v.lower() in ("yes", "true", "t", "1")
 
 def origin_already_referenced(origin: any, choice: any) -> bool:
-    global exhaustive_random_cache
+    global exhaustive_random_repeating_cache
 
     json_origin = json.dumps(origin, sort_keys=True)
     json_choice = json.dumps(choice, sort_keys=True)
-    for cache_key, cache_values in enumerate(exhaustive_random_cache.items()):
+    for cache_key, cache_values in enumerate(exhaustive_random_repeating_cache.items()):
         if json_origin in cache_values:
             # Current choice would create a circular reference
             if json_choice == cache_key:
@@ -22,21 +22,21 @@ def origin_already_referenced(origin: any, choice: any) -> bool:
     return False
     
 def update_cache(origin: any, choice: any):
-    global exhaustive_random_cache
+    global exhaustive_random_repeating_cache
 
     json_origin = json.dumps(origin, sort_keys=True)
     json_choice = json.dumps(choice, sort_keys=True)
 
-    if json_origin in exhaustive_random_cache.keys():
+    if json_origin in exhaustive_random_repeating_cache.keys():
         # Existing record
-        existing_list = exhaustive_random_cache[json_origin]
+        existing_list = exhaustive_random_repeating_cache[json_origin]
     else:
         # New record
         existing_list = []
 
     # Update cache
     existing_list.append(json_choice)
-    exhaustive_random_cache.update(json_origin=existing_list)
+    exhaustive_random_repeating_cache.update(json_origin=existing_list)
 
 # Do not change function name or arguments
 def generate(
@@ -72,7 +72,7 @@ def generate(
 
     # End cycle
     if len(choices) == 0:
-        return (None, [])
+        choices = original_choices[:]
 
     # Randomly select target
     shuffle(choices)

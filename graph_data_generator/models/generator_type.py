@@ -27,7 +27,7 @@ class GeneratorType(Enum):
             return GeneratorType.FUNCTION
         elif type == "datetime":
             return GeneratorType.DATETIME
-        elif type == "bool":
+        elif type == "bool" or type == "boolean":
             return GeneratorType.BOOL
         elif type == "assignment":
             return GeneratorType.ASSIGNMENT
