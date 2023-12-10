@@ -273,7 +273,7 @@ def relationshipmappings_from(
             assignment_generator_config = properties.get("{assignment}", None)
             # If missing, use ExhaustiveRandom
             if assignment_generator_config is None:
-                assignment_generator_config = "{\"sequential\":[]}"
+                assignment_generator_config = "{\"exhaustive_random\":[]}"
 
         # Get proper generators for count generator
         try:
