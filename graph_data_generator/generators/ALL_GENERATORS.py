@@ -4,7 +4,7 @@
 from graph_data_generator.models.generator import generators_from_json
 
 # Regular generators
-from graph_data_generator.generators import bool, catch_phrase, city, company_name, country, date, email, first_name, float, float_from_list, float_range, hierarchical, int, int_from_list, int_range, last_name, lorem_paragraphs, loremtext_sentence, loremtext_words, md5, string_from_csv, string_from_list, string_literal, technical_phrase, uri, uuid
+from graph_data_generator.generators import bool, catch_phrase, city, company_name, country, credit_card_expire, credit_card_number, credit_card_provider, date, email, first_name, float, float_from_list, float_range, hierarchical, int, int_from_list, int_range, isbn_10, isbn_13, job, last_name, lorem_paragraphs, loremtext_sentence, loremtext_words, md5, phone_number, ssn, string_from_csv, string_from_list, string_literal, technical_phrase, uri, uuid
 
 # Functional generators
 from graph_data_generator.generators import add_floats, add_ints, add_strings
@@ -145,6 +145,37 @@ generators_json = {
         "tags": [
             "country",
             "from"
+        ],
+        "type": "String"
+    },
+    "credit_card_expire": {
+        "args": [],
+        "code": credit_card_expire,
+        "description": "Credit card expirary number using the Faker library.",
+        "name": "Credit Card Expire",
+        "tags": [
+            "credit card",
+            "expire"
+        ],
+        "type": "String"
+    },
+    "credit_card_number": {
+        "args": [],
+        "code": credit_card_number,
+        "description": "Credit card number using the Faker library.",
+        "name": "Credit Card Number",
+        "tags": [
+            "credit card",
+        ],
+        "type": "String"
+    },
+    "credit_card_provider": {
+        "args": [],
+        "code": credit_card_provider,
+        "description": "Credit card provider company using the Faker library.",
+        "name": "Credit Card Provider",
+        "tags": [
+            "credit card",
         ],
         "type": "String"
     },
@@ -389,6 +420,41 @@ generators_json = {
         ],
         "type": "Integer"
     },
+    "isbn_10": {
+        "args": [
+        ],
+        "code": isbn_10,
+        "description": "Random International Standard Book Number (ISBN) 10 number using Faker library",
+        "name": "ISBN 10",
+        "tags": [
+            "ISBN",
+            "International"
+        ],
+        "type": "String"
+    },
+    "isbn_13": {
+        "args": [
+        ],
+        "code": isbn_13,
+        "description": "Random International Standard Book Number (ISBN) 13 number using Faker library",
+        "name": "ISBN 13",
+        "tags": [
+            "ISBN",
+            "International"
+        ],
+        "type": "String"
+    },
+    "job": {
+        "args": [],
+        "code": job,
+        "description": "Random job title using the Faker library.",
+        "name": "Job",
+        "tags": [
+            "job",
+            "occupation"
+        ],
+        "type": "String"
+    },
     "last_name": {
         "args": [],
         "code": last_name,
@@ -492,6 +558,18 @@ generators_json = {
         ],
         "type": "String"
     },
+    "phone_number": {
+        "args": [
+        ],
+        "code": phone_number,
+        "description": "Random phone number using Faker library.",
+        "name": "Phone Number",
+        "tags": [
+            "phone",
+            "number"
+        ],
+        "type": "String"
+    },
     "pure_random": {
         "args": [],
         "code": pure_random,
@@ -519,6 +597,19 @@ generators_json = {
     #     ],
     #     "type": "Reference"
     # },
+    "ssn": {
+        "args": [
+        ],
+        "code": ssn,
+        "description": "Social Security Number using Faker library",
+        "name": "SSN",
+        "tags": [
+            "ssn",
+            "social",
+            "security"
+        ],
+        "type": "String"
+    },
     "string": {
         "args": [
             {
